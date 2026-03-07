@@ -2,6 +2,7 @@ import React from 'react';
 import Navbar from '../components/Navbar';
 import { Hero } from '../components/Hero';
 import { GameRow } from '../components/GameRow';
+import { GameMeter } from '../components/GameMeter';
 import { useGames } from '../hooks/useGames';
 import { rawg } from '../api/rawg';
 
@@ -28,6 +29,8 @@ const Home = () => {
                 seeAllHref="/trending"
                 showRank={true}
             />
+
+            <GameMeter games={trending.data || []} loading={trending.loading} />
 
             <GameRow
                 title="🏆 Top Rated All Time"
