@@ -7,6 +7,7 @@ import { MoodGrid } from '../components/MoodGrid';
 import { DebateCards } from '../components/DebateCards';
 import { FeaturesSection } from '../components/FeaturesSection';
 import { CTABanner } from '../components/CTABanner';
+import { Footer } from '../components/Footer';
 import { useGames } from '../hooks/useGames';
 import { rawg } from '../api/rawg';
 
@@ -61,6 +62,7 @@ const Home = () => {
             <DebateCards />
             <FeaturesSection />
             <CTABanner />
+            <Footer />
 
         </div>
     );
