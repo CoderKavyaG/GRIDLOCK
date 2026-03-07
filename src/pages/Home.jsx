@@ -3,6 +3,7 @@ import Navbar from '../components/Navbar';
 import { Hero } from '../components/Hero';
 import { GameRow } from '../components/GameRow';
 import { GameMeter } from '../components/GameMeter';
+import { MoodGrid } from '../components/MoodGrid';
 import { useGames } from '../hooks/useGames';
 import { rawg } from '../api/rawg';
 
@@ -41,6 +42,8 @@ const Home = () => {
                 error={topRated.error}
                 seeAllHref="/top-rated"
             />
+
+            <MoodGrid />
 
             <GameRow
                 title="New Releases"
