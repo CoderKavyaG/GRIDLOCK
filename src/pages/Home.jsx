@@ -4,6 +4,9 @@ import { Hero } from '../components/Hero';
 import { GameRow } from '../components/GameRow';
 import { GameMeter } from '../components/GameMeter';
 import { MoodGrid } from '../components/MoodGrid';
+import { DebateCards } from '../components/DebateCards';
+import { FeaturesSection } from '../components/FeaturesSection';
+import { CTABanner } from '../components/CTABanner';
 import { useGames } from '../hooks/useGames';
 import { rawg } from '../api/rawg';
 
@@ -54,6 +57,10 @@ const Home = () => {
                 error={newReleases.error}
                 seeAllHref="/new-releases"
             />
+
+            <DebateCards />
+            <FeaturesSection />
+            <CTABanner />
 
         </div>
     );
