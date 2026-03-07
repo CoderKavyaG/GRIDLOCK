@@ -1,23 +1,24 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@400;600;700;800;900&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-:root {
-  --bg-primary: #0a0a0a;
-  --bg-secondary: #111111;
-  --bg-card: #161616;
-  --bg-hover: #1e1e1e;
-  --accent: #e8ff47;
-  --accent-red: #ff4757;
-  --accent-green: #2ed573;
-  --accent-yellow: #ffa502;
-  --accent-purple: #a855f7;
-  --text-primary: #f0f0f0;
-  --text-muted: #777777;
-  --border: #222222;
-  --border-hover: #3a3a3a;
+@theme {
+  --font-syne: "Syne", sans-serif;
+  --font-inter: "Inter", sans-serif;
+
+  --color-accent: #e8ff47;
+  --color-accent-red: #ff4757;
+  --color-accent-green: #2ed573;
+  --color-accent-yellow: #ffa502;
+  --color-accent-purple: #a855f7;
+  --color-bg-primary: #0a0a0a;
+  --color-bg-secondary: #111111;
+  --color-bg-card: #161616;
+  --color-bg-hover: #1e1e1e;
+  --color-text-primary: #f0f0f0;
+  --color-text-muted: #777777;
+  --color-border-base: #222222;
+  --color-border-hover: #3a3a3a;
 }
 
 html {
@@ -25,8 +26,8 @@ html {
 }
 
 body {
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
   font-family: 'Inter', sans-serif;
   margin: 0;
   -webkit-font-smoothing: antialiased;
@@ -43,7 +44,7 @@ h6 {
 }
 
 ::selection {
-  background-color: var(--accent);
+  background-color: var(--color-accent);
   color: black;
 }
 

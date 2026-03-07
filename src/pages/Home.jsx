@@ -27,7 +27,7 @@ const Home = () => {
             <GameRow
                 title="Trending Now"
                 chipLabel="THIS WEEK"
-                chipColor="var(--accent)"
+                chipColor="var(--color-accent)"
                 games={trending.data}
                 loading={trending.loading}
                 error={trending.error}
