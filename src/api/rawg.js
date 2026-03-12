@@ -1,6 +1,10 @@
 const BASE = "https://api.rawg.io/api";
 const KEY = import.meta.env.VITE_RAWG_KEY;
 
+if (!KEY) {
+    console.warn("⚠️ RAWG API Key is missing! Check your Vercel Environment Variables.");
+}
+
 export const rawg = {
     heroGames: () => `${BASE}/games?ordering=-rating&metacritic=90,100&page_size=5&key=${KEY}`,
     trending: () => `${BASE}/games?ordering=-added&page_size=12&key=${KEY}`,

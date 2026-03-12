@@ -25,6 +25,10 @@ export const MoodGrid = () => {
 
         const fetchMoods = async () => {
             try {
+                if (!KEY) {
+                    throw new Error("API Key is missing from environment variables");
+                }
+
                 const promises = moods.map(m =>
                     axios.get(`${BASE}/games?${m.param}&ordering=-rating&page_size=1&key=${KEY}`)
                 );
