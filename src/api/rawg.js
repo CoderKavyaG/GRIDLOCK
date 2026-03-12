@@ -11,4 +11,18 @@ export const rawg = {
     topRated: () => `${BASE}/games?ordering=-rating&metacritic=90,100&page_size=12&key=${KEY}`,
     newReleases: () => `${BASE}/games?ordering=-released&page_size=10&key=${KEY}`,
     byGenre: (slug) => `${BASE}/games?genres=${slug}&ordering=-rating&page_size=1&key=${KEY}`,
+    gameDetails: (id) => `${BASE}/games/${id}?key=${KEY}`,
+    gameScreenshots: (id) => `${BASE}/games/${id}/screenshots?key=${KEY}`,
+    gameMovies: (id) => `${BASE}/games/${id}/movies?key=${KEY}`,
+    searchGames: (query, page = 1) => `${BASE}/games?search=${query}&page=${page}&page_size=20&key=${KEY}`,
+    explore: (params) => {
+        let url = `${BASE}/games?key=${KEY}&page_size=24`;
+        if (params.page) url += `&page=${params.page}`;
+        if (params.search) url += `&search=${params.search}`;
+        if (params.ordering) url += `&ordering=${params.ordering}`;
+        if (params.dates) url += `&dates=${params.dates}`;
+        if (params.genres) url += `&genres=${params.genres}`;
+        if (params.platforms) url += `&platforms=${params.platforms}`;
+        return url;
+    }
 };
