@@ -48,7 +48,7 @@ export const Navbar = () => {
             <header
                 className={`fixed top-0 left-0 w-full h-[64px] z-[100] transition-all duration-300 ease-in-out ${scrolled
                         ? 'bg-[#0a0a0a]/90 backdrop-blur-[16px] border-b border-[#1e1e1e]'
-                        : 'bg-transparent border-b border-transparent'
+                        : 'bg-[#0a0a0a]/40 backdrop-blur-[8px] border-b border-white/5'
                     }`}
             >
                 <div className="max-w-[1400px] h-full mx-auto px-4 lg:px-8 flex items-center justify-between">

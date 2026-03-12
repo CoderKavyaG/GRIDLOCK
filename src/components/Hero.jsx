@@ -107,8 +107,8 @@ export const Hero = () => {
             <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-transparent h-[160px] z-[4]"></div>
 
             {/* Content Container */}
-            <div className="absolute bottom-[12%] lg:bottom-[15%] left-0 w-full z-[10] px-4 lg:px-8 mt-[80px]">
-                <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row items-end">
+            <div className="absolute top-0 left-0 w-full h-full z-[10] px-4 lg:px-8 flex items-end">
+                <div className="max-w-[1400px] w-full mx-auto pb-[8%] lg:pb-[10%] pt-[100px] flex flex-col lg:flex-row items-end">
 
                     {/* Left Column (55%) */}
                     <div className="w-full lg:w-[55%] flex flex-col gap-5 lg:gap-6">

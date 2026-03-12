@@ -25,6 +25,9 @@ export const MoodGrid = () => {
 
         const fetchMoods = async () => {
             try {
+                // Initial delay to let main page requests finish
+                await new Promise(resolve => setTimeout(resolve, 500));
+
                 if (!KEY) {
                     throw new Error("API Key is missing from environment variables");
                 }
@@ -39,12 +42,12 @@ export const MoodGrid = () => {
                         const game = res.data.results?.[0];
                         bgMap[m.id] = game?.background_image || '';
                     } catch (e) {
-                        console.warn(`Failed to fetch background for ${m.id}`, e);
+                        console.warn(`Failed to fetch for mood ${m.id}`, e.message);
                         bgMap[m.id] = '';
                     }
-                    // Wait 100ms between requests
+                    // Wait 150ms between requests (slightly longer to be safe)
                     if (i < moods.length - 1) {
-                        await new Promise(resolve => setTimeout(resolve, 100));
+                        await new Promise(resolve => setTimeout(resolve, 150));
                     }
                 }
 
@@ -53,7 +56,7 @@ export const MoodGrid = () => {
                     setLoading(false);
                 }
             } catch (err) {
-                console.error("Critical error loading mood backgrounds", err);
+                console.error("Critical error in MoodGrid:", err.message);
                 if (isMounted) setLoading(false);
             }
         };
