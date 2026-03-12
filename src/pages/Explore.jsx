@@ -49,6 +49,19 @@ export default function Explore() {
     sort: searchParams.get("sort") || "Popular"
   });
 
+  // Sync state with URL params (handles mid-mount navigation like Navbar search)
+  useEffect(() => {
+    const s = searchParams.get("search") || "";
+    const g = searchParams.get("genre") || "";
+    const p = searchParams.get("platform") || "";
+    const y = searchParams.get("year") || "";
+    const o = searchParams.get("sort") || "Popular";
+
+    setQuery(s);
+    setActiveFilters({ genre: g, platform: p, year: y, sort: o });
+  }, [searchParams]);
+
+
   const fetchGames = useCallback(async (isLoadMore = false) => {
     isLoadMore ? setLoadingMore(true) : setLoading(true);
     

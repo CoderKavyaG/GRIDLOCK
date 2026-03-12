@@ -161,7 +161,7 @@ export default function GameDetail() {
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
-    alert("URL copied to clipboard!"); // Replace with Toast
+    addToast("Link copied to clipboard ✓", "success");
   };
   
   const getVerdictMetadata = (v) => {
@@ -248,7 +248,7 @@ export default function GameDetail() {
             </button>
           ) : (
             <button 
-              onClick={() => user ? setShowVerdictModal(true) : alert("Sign in to cast verdict")}
+              onClick={() => user ? setShowVerdictModal(true) : addToast("Sign in to cast verdict", "error")}
               className="h-10 px-6 bg-transparent border border-[#333] hover:bg-white/5 text-white font-syne font-bold rounded-lg transition-all text-[14px]"
             >
               Cast Your Verdict
@@ -256,7 +256,7 @@ export default function GameDetail() {
           )}
 
           <button 
-             onClick={() => user ? setShowReviewModal(true) : alert("Sign in to write review")}
+             onClick={() => user ? setShowReviewModal(true) : addToast("Sign in to write review", "error")}
              className="h-10 px-4 text-[var(--text-muted)] hover:text-white font-medium text-[14px] transition-colors"
           >
             Write Review

@@ -1,5 +1,4 @@
 import React from 'react';
-import Navbar from '../components/Navbar';
 import { Hero } from '../components/Hero';
 import { GameRow } from '../components/GameRow';
 import { GameMeter } from '../components/GameMeter';
@@ -7,7 +6,6 @@ import { MoodGrid } from '../components/MoodGrid';
 import { DebateCards } from '../components/DebateCards';
 import { FeaturesSection } from '../components/FeaturesSection';
 import { CTABanner } from '../components/CTABanner';
-import { Footer } from '../components/Footer';
 import { useGames } from '../hooks/useGames';
 import { rawg } from '../api/rawg';
 
@@ -17,8 +15,7 @@ const Home = () => {
     const newReleases = useGames(rawg.newReleases);
 
     return (
-        <div className="min-h-screen pb-[80px]">
-            <Navbar />
+        <div className="min-h-screen pb-[60px]">
             <Hero />
 
             {/* Spacer between hero and first row */}
@@ -27,11 +24,11 @@ const Home = () => {
             <GameRow
                 title="Trending Now"
                 chipLabel="THIS WEEK"
-                chipColor="var(--color-accent)"
+                chipColor="var(--accent)"
                 games={trending.data}
                 loading={trending.loading}
                 error={trending.error}
-                seeAllHref="/trending"
+                seeAllHref="/explore?sort=Popular"
                 showRank={true}
             />
 
@@ -44,7 +41,7 @@ const Home = () => {
                 games={topRated.data}
                 loading={topRated.loading}
                 error={topRated.error}
-                seeAllHref="/top-rated"
+                seeAllHref="/explore?sort=Top Rated"
             />
 
             <MoodGrid />
@@ -56,16 +53,15 @@ const Home = () => {
                 games={newReleases.data}
                 loading={newReleases.loading}
                 error={newReleases.error}
-                seeAllHref="/new-releases"
+                seeAllHref="/explore?sort=New Releases"
             />
 
             <DebateCards />
             <FeaturesSection />
             <CTABanner />
-            <Footer />
-
         </div>
     );
 };
 
 export default Home;
+

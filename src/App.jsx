@@ -19,6 +19,7 @@ import SingleDebate from './pages/SingleDebate';
 import Settings from './pages/Settings';
 import UserProfile from './pages/UserProfile';
 import NotFound from './pages/NotFound';
+import Footer from './components/Footer';
 
 function App() {
   return (
@@ -52,6 +53,7 @@ function App() {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
+          <Footer />
         </div>
       </ToastProvider>
     </AuthProvider>
