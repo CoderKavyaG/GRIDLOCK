@@ -103,8 +103,11 @@ export const Hero = () => {
             {/* Layer 3: Gradient from Bottom */}
             <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent z-[3]"></div>
 
+            {/* Layer 4: Gradient from Top (New - for Navbar visibility) */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-transparent h-[160px] z-[4]"></div>
+
             {/* Content Container */}
-            <div className="absolute bottom-[18%] left-0 w-full z-[10] px-4 lg:px-8">
+            <div className="absolute bottom-[12%] lg:bottom-[15%] left-0 w-full z-[10] px-4 lg:px-8 mt-[80px]">
                 <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row items-end">
 
                     {/* Left Column (55%) */}
@@ -126,8 +129,8 @@ export const Hero = () => {
                             animate="visible"
                             variants={textVariants}
                             key={`title-${activeGame.id}`}
-                            className="font-syne font-[900] text-white text-[36px] lg:text-[clamp(48px,7vw,96px)] leading-[1.0] drop-shadow-2xl max-w-[700px]"
-                            style={{ textShadow: "0 2px 20px rgba(0,0,0,0.5)" }}
+                            className="font-syne font-[900] text-white text-[32px] lg:text-[clamp(40px,6vw,84px)] leading-[1.0] drop-shadow-2xl max-w-[800px]"
+                            style={{ textShadow: "0 4px 30px rgba(0,0,0,0.7)" }}
                         >
                             {activeGame.name}
                         </motion.h1>
