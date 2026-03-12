@@ -29,22 +29,31 @@ export const MoodGrid = () => {
                     throw new Error("API Key is missing from environment variables");
                 }
 
-                const promises = moods.map(m =>
-                    axios.get(`${BASE}/games?${m.param}&ordering=-rating&page_size=1&key=${KEY}`)
-                );
-                const results = await Promise.all(promises);
+                const bgMap = {};
+                // Stagger requests to avoid connection resets/rate limits
+                for (let i = 0; i < moods.length; i++) {
+                    if (!isMounted) break;
+                    const m = moods[i];
+                    try {
+                        const res = await axios.get(`${BASE}/games?${m.param}&ordering=-rating&page_size=1&key=${KEY}`);
+                        const game = res.data.results?.[0];
+                        bgMap[m.id] = game?.background_image || '';
+                    } catch (e) {
+                        console.warn(`Failed to fetch background for ${m.id}`, e);
+                        bgMap[m.id] = '';
+                    }
+                    // Wait 100ms between requests
+                    if (i < moods.length - 1) {
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                    }
+                }
 
                 if (isMounted) {
-                    const bgMap = {};
-                    results.forEach((res, i) => {
-                        const game = res.data.results?.[0];
-                        bgMap[moods[i].id] = game?.background_image || '';
-                    });
                     setBackgrounds(bgMap);
                     setLoading(false);
                 }
             } catch (err) {
-                console.error("Failed to load mood backgrounds", err);
+                console.error("Critical error loading mood backgrounds", err);
                 if (isMounted) setLoading(false);
             }
         };
