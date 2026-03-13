@@ -1,27 +1,10 @@
-import { useState, useEffect } from "react";
+import { useGames } from "../../hooks/useGames";
 import { Link } from "react-router-dom";
 import { rawg } from "../../api/rawg";
-import { motion } from "framer-motion";
 import { FiArrowRight } from "react-icons/fi";
 
 export const EditorialHero = () => {
-    const [topGames, setTopGames] = useState([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchTopGames = async () => {
-            try {
-                const res = await fetch(`${rawg.baseUrl}/games?key=${rawg.key}&ordering=-rating&metacritic=90,100&page_size=4`);
-                const data = await res.json();
-                setTopGames(data.results || []);
-            } catch (err) {
-                console.error("Hero fetch error:", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchTopGames();
-    }, []);
+    const { data: topGames, loading } = useGames(rawg.topRated);
 
     if (loading || topGames.length < 4) {
         return (

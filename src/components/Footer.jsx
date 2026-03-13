@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaTwitter, FaInstagram, FaDiscord, FaYoutube } from 'react-icons/fa';
+import { FaXTwitter, FaInstagram, FaDiscord, FaYoutube } from 'react-icons/fa6';
 import { Link } from 'react-router-dom';
 
 export const Footer = () => {
@@ -25,7 +25,7 @@ export const Footer = () => {
                         </p>
                         <div className="flex items-center gap-[16px]">
                             <a href="#" aria-label="Twitter" className="text-text-muted hover:text-white transition-colors text-[18px]">
-                                <FaTwitter />
+                                <FaXTwitter />
                             </a>
                             <a href="#" aria-label="Instagram" className="text-text-muted hover:text-white transition-colors text-[18px]">
                                 <FaInstagram />

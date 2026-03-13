@@ -1,12 +1,11 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import { HiHandThumbUp, HiMinus, HiHandThumbDown, HiSparkles } from 'react-icons/hi2';
 
 export const GameMeter = ({ games = [], loading }) => {
     // Hardcoded mock data for the 3 cases
     const mockVerdicts = [
         {
             dominantLabel: 'MUST PLAY',
-            dominantIcon: '🟢',
+            dominantIcon: HiHandThumbUp,
             dominantColor: '#2ed573',
             dominantBgColor: 'rgba(46,213,115,0.12)',
             parts: [
@@ -18,7 +17,7 @@ export const GameMeter = ({ games = [], loading }) => {
         },
         {
             dominantLabel: 'GOOD ENOUGH',
-            dominantIcon: '🟡',
+            dominantIcon: HiMinus,
             dominantColor: '#ffa502',
             dominantBgColor: 'rgba(255,165,2,0.12)',
             parts: [
@@ -30,7 +29,7 @@ export const GameMeter = ({ games = [], loading }) => {
         },
         {
             dominantLabel: 'MASTERPIECE',
-            dominantIcon: '👑',
+            dominantIcon: HiSparkles,
             dominantColor: '#a855f7',
             dominantBgColor: 'rgba(168,85,247,0.12)',
             parts: [
@@ -51,7 +50,7 @@ export const GameMeter = ({ games = [], loading }) => {
                 {/* Section Header */}
                 <div className="flex flex-col items-center text-center mb-[48px]">
                     <span className="text-[11px] uppercase text-accent tracking-[0.25em] font-[700] mb-3">
-                        THE VERDICT SYSTEM
+                        GAMEMETER
                     </span>
                     <h2 className="font-syne text-[48px] font-[900] text-white leading-none mb-3">
                         The GameMeter™
@@ -105,7 +104,9 @@ export const GameMeter = ({ games = [], loading }) => {
                                             className="w-full rounded-[8px] p-[12px_16px] text-center"
                                             style={{ backgroundColor: mock.dominantBgColor }}
                                         >
-                                            <div className="text-[24px] mb-1 leading-none">{mock.dominantIcon}</div>
+                                            <div className="flex justify-center mb-1">
+                                                <mock.dominantIcon size={24} style={{ color: mock.dominantColor }} aria-hidden="true" />
+                                            </div>
                                             <div
                                                 className="font-syne text-[22px] font-[900] tracking-wide"
                                                 style={{ color: mock.dominantColor }}
@@ -143,25 +144,25 @@ export const GameMeter = ({ games = [], loading }) => {
                                             {/* Must Play Button */}
                                             <button className="group relative border border-[#2ed573]/30 rounded-full px-[16px] py-[8px] text-[13px] font-[600] text-[#2ed573]/70 hover:border-[#2ed573] hover:text-[#2ed573] transition-colors overflow-hidden">
                                                 <div className="absolute inset-0 bg-[#2ed573]/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                                <span className="relative z-10">🟢 Must Play</span>
+                                                <span className="relative z-10 flex items-center gap-2"><HiHandThumbUp size={14} aria-hidden="true" /> Must Play</span>
                                             </button>
 
                                             {/* Good Enough Button */}
                                             <button className="group relative border border-[#ffa502]/30 rounded-full px-[16px] py-[8px] text-[13px] font-[600] text-[#ffa502]/70 hover:border-[#ffa502] hover:text-[#ffa502] transition-colors overflow-hidden">
                                                 <div className="absolute inset-0 bg-[#ffa502]/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                                <span className="relative z-10">🟡 Good Enough</span>
+                                                <span className="relative z-10 flex items-center gap-2"><HiMinus size={14} aria-hidden="true" /> Good Enough</span>
                                             </button>
 
                                             {/* Skip It Button */}
                                             <button className="group relative border border-[#ff4757]/30 rounded-full px-[16px] py-[8px] text-[13px] font-[600] text-[#ff4757]/70 hover:border-[#ff4757] hover:text-[#ff4757] transition-colors overflow-hidden">
                                                 <div className="absolute inset-0 bg-[#ff4757]/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                                <span className="relative z-10">🔴 Skip It</span>
+                                                <span className="relative z-10 flex items-center gap-2"><HiHandThumbDown size={14} aria-hidden="true" /> Skip It</span>
                                             </button>
 
                                             {/* Masterpiece Button */}
                                             <button className="group relative border border-[#a855f7]/30 rounded-full px-[16px] py-[8px] text-[13px] font-[600] text-[#a855f7]/70 hover:border-[#a855f7] hover:text-[#a855f7] transition-colors overflow-hidden">
                                                 <div className="absolute inset-0 bg-[#a855f7]/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                                <span className="relative z-10">👑 Masterpiece</span>
+                                                <span className="relative z-10 flex items-center gap-2"><HiSparkles size={14} aria-hidden="true" /> Masterpiece</span>
                                             </button>
                                         </div>
 

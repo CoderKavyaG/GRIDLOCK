@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { FiX, FiArrowRight } from "react-icons/fi";
-import { HiThumbUp, HiMinus, HiThumbDown, HiSparkles } from "react-icons/hi2";
+import { HiHandThumbUp, HiMinus, HiHandThumbDown, HiSparkles } from "react-icons/hi2";
 import { collection, addDoc, doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import { useAuth } from "../context/AuthContext";
 
 const VERDICTS = [
-  { id: "mustPlay", label: "Must Play", color: "#2ed573", icon: HiThumbUp },
+  { id: "mustPlay", label: "Must Play", color: "#2ed573", icon: HiHandThumbUp },
   { id: "goodEnough", label: "Good Enough", color: "#ffa502", icon: HiMinus },
-  { id: "skipIt", label: "Skip It", color: "#ff4757", icon: HiThumbDown },
+  { id: "skipIt", label: "Skip It", color: "#ff4757", icon: HiHandThumbDown },
   { id: "masterpiece", label: "Masterpiece", color: "#a855f7", icon: HiSparkles },
 ];
 

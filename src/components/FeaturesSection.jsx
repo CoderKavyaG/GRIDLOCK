@@ -1,12 +1,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { HiThumbUp } from 'react-icons/hi2';
+import { HiHandThumbUp } from 'react-icons/hi2';
 import { FiBookmark, FiGrid } from 'react-icons/fi';
 import { BiTrendingUp } from 'react-icons/bi';
 
 const features = [
     {
-        icon: HiThumbUp,
+        icon: HiHandThumbUp,
         title: 'GAMEMETER',
         body: 'Vote with verdicts. Must Play, Good Enough, Skip It, or Masterpiece. The community decides — not critics.'
     },

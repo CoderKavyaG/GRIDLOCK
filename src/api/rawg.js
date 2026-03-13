@@ -15,6 +15,7 @@ export const rawg = {
     gameScreenshots: (id) => `${BASE}/games/${id}/screenshots?key=${KEY}`,
     gameMovies: (id) => `${BASE}/games/${id}/movies?key=${KEY}`,
     searchGames: (query, page = 1) => `${BASE}/games?search=${query}&page=${page}&page_size=20&key=${KEY}`,
+    search: (query, limit = 6) => `${BASE}/games?search=${query}&page_size=${limit}&key=${KEY}`,
     explore: (params) => {
         let url = `${BASE}/games?key=${KEY}&page_size=24`;
         if (params.page) url += `&page=${params.page}`;

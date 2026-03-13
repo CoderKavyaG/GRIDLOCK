@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import { db } from "../firebase/firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
-import { HiSparkles, HiThumbUp, HiThumbDown, HiMinus } from "react-icons/hi2";
+import { HiSparkles, HiHandThumbUp, HiHandThumbDown, HiMinus } from "react-icons/hi2";
 import { FiArrowRight, FiShare2, FiDownload } from "react-icons/fi";
 import { BiJoystick } from "react-icons/bi";
 import html2canvas from "html2canvas";
@@ -105,7 +105,7 @@ export default function Rewind() {
             title: "Completed",
             value: stats?.totalPlayed || 0,
             subtitle: "Games reached the 'Played' status. You actually finished some!",
-            icon: <HiThumbUp className="text-accent" size={48} />
+            icon: <HiHandThumbUp className="text-accent" size={48} />
         },
         {
             title: "Vibe Check",
@@ -222,7 +222,7 @@ export default function Rewind() {
                                     </div>
                                     <div className="flex items-center gap-4">
                                         <div className="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center text-accent">
-                                            <HiThumbUp size={24} />
+                                            <HiHandThumbUp size={24} />
                                         </div>
                                         <div>
                                             <div className="text-[11px] text-white/40 uppercase font-bold tracking-wider">Verdicts Cast</div>

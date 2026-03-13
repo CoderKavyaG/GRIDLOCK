@@ -12,7 +12,7 @@ import WriteReviewModal from "../components/WriteReviewModal";
 import Lightbox from "../components/Lightbox";
 import EmptyState from "../components/EmptyState";
 import { FiBookmark, FiShare2, FiCalendar, FiBriefcase, FiClock, FiFlag, FiArrowRight } from "react-icons/fi";
-import { HiThumbUp, HiThumbDown, HiMinus, HiSparkles } from "react-icons/hi2";
+import { HiHandThumbUp, HiHandThumbDown, HiMinus, HiSparkles } from "react-icons/hi2";
 import { BiJoystick } from "react-icons/bi";
 
 export default function GameDetail() {
@@ -315,9 +315,9 @@ export default function GameDetail() {
 
              <div className="space-y-4">
                  {[
-                   { id: 'mustPlay', label: "Must Play", color: "#2ed573", icon: HiThumbUp },
+                   { id: 'mustPlay', label: "Must Play", color: "#2ed573", icon: HiHandThumbUp },
                    { id: 'goodEnough', label: "Good Enough", color: "#ffa502", icon: HiMinus },
-                   { id: 'skipIt', label: "Skip It", color: "#ff4757", icon: HiThumbDown },
+                   { id: 'skipIt', label: "Skip It", color: "#ff4757", icon: HiHandThumbDown },
                    { id: 'masterpiece', label: "Masterpiece", color: "#a855f7", icon: HiSparkles },
                  ].map(v => {
                      const count = verdictStats[v.id] || 0;
@@ -433,7 +433,7 @@ export default function GameDetail() {
 
                                <div className="mt-5 pt-4 border-t border-[#222] flex items-center gap-6">
                                     <button className="flex items-center gap-2 text-[12px] text-[var(--text-muted)] hover:text-[#2ed573] transition-colors font-medium">
-                                        <HiThumbUp size={14} aria-hidden="true" /> Helpful ({(review.likes || []).length})
+                                        <HiHandThumbUp size={14} aria-hidden="true" /> Helpful ({(review.likes || []).length})
                                     </button>
                                     <button className="text-[12px] text-[#666] hover:text-[#ff4757] transition-colors ml-auto">
                                         Report

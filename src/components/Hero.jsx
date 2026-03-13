@@ -4,7 +4,7 @@ import { rawg } from '../api/rawg';
 import { useGames } from '../hooks/useGames';
 import { FiStar, FiCalendar, FiMonitor, FiArrowRight, FiPlus } from 'react-icons/fi';
 import { IoGameControllerOutline } from 'react-icons/io5';
-import { HiThumbUp, HiMinus, HiThumbDown } from 'react-icons/hi2';
+import { HiHandThumbUp, HiMinus, HiHandThumbDown } from 'react-icons/hi2';
 import { BiTrendingUp } from 'react-icons/bi';
 import { Link } from 'react-router-dom';
 
@@ -58,9 +58,9 @@ export const Hero = () => {
 
     // Mock verdict data
     const verdictMocks = [
-        { label: 'Must Play', percent: 67, colorClass: 'text-[#2ed573]', bgClass: 'bg-[#2ed573]/10 border-[#2ed573]/30', icon: HiThumbUp },
+        { label: 'Must Play', percent: 67, colorClass: 'text-[#2ed573]', bgClass: 'bg-[#2ed573]/10 border-[#2ed573]/30', icon: HiHandThumbUp },
         { label: 'Good Enough', percent: 22, colorClass: 'text-[#ffa502]', bgClass: 'bg-[#ffa502]/10 border-[#ffa502]/30', icon: HiMinus },
-        { label: 'Skip It', percent: 11, colorClass: 'text-[#ff4757]', bgClass: 'bg-[#ff4757]/10 border-[#ff4757]/30', icon: HiThumbDown }
+        { label: 'Skip It', percent: 11, colorClass: 'text-[#ff4757]', bgClass: 'bg-[#ff4757]/10 border-[#ffa502]/30', icon: HiHandThumbDown }
     ];
 
     const textVariants = {

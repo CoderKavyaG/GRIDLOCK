@@ -1,19 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { motion } from 'framer-motion';
+import axios from 'axios';
+import { FiBook, FiFeather, FiZap, FiCpu, FiMoon, FiGrid, FiCompass, FiTarget } from 'react-icons/fi';
+import { BiJoystick } from 'react-icons/bi';
 
 const BASE = "https://api.rawg.io/api";
 const KEY = import.meta.env.VITE_RAWG_KEY;
 
 const moods = [
-    { id: 'story', title: 'LOST IN STORY', param: 'genres=role-playing-games-rpg', emoji: '📖', count: '4,200+' },
-    { id: 'vibes', title: 'JUST VIBES', param: 'genres=indie', emoji: '🌿', count: '8,100+' },
-    { id: 'action', title: 'HEART PUMPING', param: 'genres=action', emoji: '⚡', count: '12,400+' },
-    { id: 'brain', title: 'BIG BRAIN', param: 'genres=strategy', emoji: '🧠', count: '3,800+' },
-    { id: 'terror', title: 'TERROR MODE', param: 'tags=horror', emoji: '💀', count: '1,500+' },
-    { id: 'chill', title: 'TAKE IT EASY', param: 'genres=puzzle', emoji: '🧩', count: '2,900+' },
-    { id: 'feels', title: 'FEEL SOMETHING', param: 'genres=adventure', emoji: '🌄', count: '6,700+' },
-    { id: 'boys', title: 'WITH THE BOYS', param: 'genres=shooter', emoji: '🎯', count: '5,300+' }
+    { id: 'story', title: 'LOST IN STORY', param: 'genres=role-playing-games-rpg', icon: FiBook, count: '4,200+' },
+    { id: 'vibes', title: 'JUST VIBES', param: 'genres=indie', icon: FiFeather, count: '8,100+' },
+    { id: 'action', title: 'HEART PUMPING', param: 'genres=action', icon: FiZap, count: '12,400+' },
+    { id: 'brain', title: 'BIG BRAIN', param: 'genres=strategy', icon: FiCpu, count: '3,800+' },
+    { id: 'terror', title: 'TERROR MODE', param: 'tags=horror', icon: FiMoon, count: '1,500+' },
+    { id: 'chill', title: 'TAKE IT EASY', param: 'genres=puzzle', icon: FiGrid, count: '2,900+' },
+    { id: 'feels', title: 'FEEL SOMETHING', param: 'genres=adventure', icon: FiCompass, count: '6,700+' },
+    { id: 'boys', title: 'WITH THE BOYS', param: 'genres=shooter', icon: FiTarget, count: '5,300+' }
 ];
 
 export const MoodGrid = () => {
@@ -126,7 +128,7 @@ export const MoodGrid = () => {
                                         />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center">
-                                            {loading ? <span className="text-[#333]">...</span> : <span className="text-2xl text-[#333]">🎮</span>}
+                                            {loading ? <span className="text-[#333]">...</span> : <BiJoystick size={32} className="text-[#333]" aria-hidden="true" />}
                                         </div>
                                     )}
                                 </div>
@@ -139,7 +141,7 @@ export const MoodGrid = () => {
 
                                 {/* Content */}
                                 <div className="absolute inset-0 z-[10] flex flex-col items-center justify-center p-4">
-                                    <span className="text-[32px] mb-2">{mood.emoji}</span>
+                                    <mood.icon size={32} className="mb-2 text-white/90" aria-hidden="true" />
                                     <h3 className="font-syne text-[18px] font-[800] text-white/90 group-hover:text-white uppercase tracking-[0.05em] text-center transition-colors duration-400">
                                         {mood.title}
                                     </h3>

@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
+import { BiJoystick } from 'react-icons/bi';
 
 export default function EmptyState({ icon, title, subtitle, ctaText, ctaLink, onCtaClick }) {
   return (
     <div className="flex flex-col items-center justify-center p-12 text-center bg-[#111] border border-[#1e1e1e] rounded-[16px]">
-      <div className="text-[48px] mb-6 select-none opacity-80">
-        {icon || "🎮"}
+      <div className="flex items-center justify-center mb-6 opacity-80">
+        {icon ? icon : <BiJoystick size={48} className="text-[var(--text-muted)]" aria-hidden="true" />}
       </div>
       <h3 className="font-syne text-[20px] font-bold text-white mb-2">
         {title || "Nothing here yet."}

@@ -5,7 +5,7 @@ import { db } from "../firebase/firebase";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { FiChevronDown, FiCheck, FiPlus, FiX } from "react-icons/fi";
-import { HiSparkles, HiThumbUp, HiMinus, HiThumbDown } from "react-icons/hi2";
+import { HiSparkles } from "react-icons/hi2";
 import { BiJoystick } from "react-icons/bi";
 import { BsCollectionPlay } from "react-icons/bs";
 

@@ -1,14 +1,15 @@
 import { useState } from "react";
-import { FaTimes } from "react-icons/fa";
+import { FiX, FiArrowRight } from "react-icons/fi";
+import { HiHandThumbUp, HiMinus, HiHandThumbDown, HiSparkles } from "react-icons/hi2";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import { useAuth } from "../context/AuthContext";
 
 const VERDICTS = [
-  { id: "mustPlay", label: "Must Play", color: "#2ed573", icon: "🟢" },
-  { id: "goodEnough", label: "Good Enough", color: "#ffa502", icon: "🟡" },
-  { id: "skipIt", label: "Skip It", color: "#ff4757", icon: "🔴" },
-  { id: "masterpiece", label: "Masterpiece", color: "#a855f7", icon: "👑" },
+  { id: "mustPlay", label: "Must Play", color: "#2ed573", icon: HiHandThumbUp },
+  { id: "goodEnough", label: "Good Enough", color: "#ffa502", icon: HiMinus },
+  { id: "skipIt", label: "Skip It", color: "#ff4757", icon: HiHandThumbDown },
+  { id: "masterpiece", label: "Masterpiece", color: "#a855f7", icon: HiSparkles },
 ];
 
 export default function VerdictModal({ game, currentVerdict, onClose, onSuccess }) {
@@ -60,7 +61,7 @@ export default function VerdictModal({ game, currentVerdict, onClose, onSuccess 
           onClick={onClose}
           className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-white transition-colors"
         >
-          <FaTimes size={20} />
+          <FiX size={20} aria-hidden="true" />
         </button>
 
         <div className="flex items-center gap-4 mb-8">
@@ -90,7 +91,7 @@ export default function VerdictModal({ game, currentVerdict, onClose, onSuccess 
                   backgroundColor: selected === v.id ? v.color : 'transparent',
                 }}
               >
-                <span className="text-xl">{v.icon}</span>
+                <v.icon size={20} aria-hidden="true" />
                 {v.label}
               </button>
             ))}
@@ -110,7 +111,7 @@ export default function VerdictModal({ game, currentVerdict, onClose, onSuccess 
                Submitting...
              </>
           ) : (
-            "Submit Verdict →"
+            <>Submit Verdict <FiArrowRight size={16} aria-hidden="true" /></>
           )}
         </button>
       </div>

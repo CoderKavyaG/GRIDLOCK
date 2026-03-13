@@ -22,18 +22,20 @@ import Settings from './pages/Settings';
 import UserProfile from './pages/UserProfile';
 import Rewind from './pages/Rewind';
 import NotFound from './pages/NotFound';
-import Footer from './components/Footer';
+import { Footer } from './components/Footer';
 import { SearchOverlay } from './components/SearchOverlay';
 
 function App() {
   return (
-    <AuthProvider>
-      <ToastProvider>
-        <SearchProvider>
-          <AppContent />
-        </SearchProvider>
-      </ToastProvider>
-    </AuthProvider>
+    <HelmetProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <SearchProvider>
+            <AppContent />
+          </SearchProvider>
+        </ToastProvider>
+      </AuthProvider>
+    </HelmetProvider>
   );
 }
 
@@ -41,40 +43,38 @@ function AppContent() {
   const { isSearchOpen, closeSearch } = useSearch();
   
   return (
-    <HelmetProvider>
-      <div className="flex flex-col min-h-screen">
-        <Navbar />
-        <SearchOverlay isOpen={isSearchOpen} onClose={closeSearch} />
-        <main className="flex-1">
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/explore" element={<Explore />} />
-            <Route path="/game/:gameId" element={<GameDetail />} />
-            <Route path="/debates" element={<Debates />} />
-            <Route path="/debates/:debateId" element={<SingleDebate />} />
-            <Route path="/collections/:id" element={<CollectionDetail />} />
-            <Route path="/user/:username" element={<UserProfile />} />
-            
-            {/* Protected Routes */}
-            <Route element={<ProtectedRoute />}>
-              <Route path="/profile" element={<MyProfile />} />
-              <Route path="/shelf" element={<GameShelf />} />
-              <Route path="/collections" element={<MyCollections />} />
-              <Route path="/collections/new" element={<CreateCollection />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/rewind" element={<Rewind />} />
-            </Route>
+    <div className="flex flex-col min-h-screen">
+      <Navbar />
+      <SearchOverlay isOpen={isSearchOpen} onClose={closeSearch} />
+      <main className="flex-1">
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/explore" element={<Explore />} />
+          <Route path="/game/:gameId" element={<GameDetail />} />
+          <Route path="/debates" element={<Debates />} />
+          <Route path="/debates/:debateId" element={<SingleDebate />} />
+          <Route path="/collections/:id" element={<CollectionDetail />} />
+          <Route path="/user/:username" element={<UserProfile />} />
+          
+          {/* Protected Routes */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/profile" element={<MyProfile />} />
+            <Route path="/shelf" element={<GameShelf />} />
+            <Route path="/collections" element={<MyCollections />} />
+            <Route path="/collections/new" element={<CreateCollection />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/rewind" element={<Rewind />} />
+          </Route>
 
-            {/* 404 */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </main>
-        <Footer />
-      </div>
-    </HelmetProvider>
+          {/* 404 */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </main>
+      <Footer />
+    </div>
   );
 }
 
