@@ -14,7 +14,6 @@ import EmptyState from "../components/EmptyState";
 import { FiBookmark, FiShare2, FiCalendar, FiBriefcase, FiClock, FiFlag, FiArrowRight } from "react-icons/fi";
 import { HiThumbUp, HiThumbDown, HiMinus, HiSparkles } from "react-icons/hi2";
 import { BiJoystick } from "react-icons/bi";
-import SEO from "../components/SEO";
 
 export default function GameDetail() {
   const { gameId } = useParams();
