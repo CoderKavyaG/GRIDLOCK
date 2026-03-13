@@ -30,7 +30,17 @@ export function AuthProvider({ children }) {
           const userSnap = await getDoc(userRef);
 
           if (userSnap.exists()) {
-            setUserProfile(userSnap.data());
+            const profile = userSnap.data();
+            setUserProfile(profile);
+
+            // Check if user is banned
+            if (profile.banned) {
+              await firebaseSignOut(auth);
+              setUser(null);
+              setUserProfile(null);
+              setIsAdmin(false);
+              return;
+            }
           } else {
             const newProfile = {
               uid: currentUser.uid,
