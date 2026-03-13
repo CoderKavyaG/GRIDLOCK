@@ -22,6 +22,8 @@ import Settings from './pages/Settings';
 import UserProfile from './pages/UserProfile';
 import Rewind from './pages/Rewind';
 import Feed from './pages/Feed';
+import Leaderboard from './pages/Leaderboard';
+import Guidelines from './pages/Guidelines';
 import NotFound from './pages/NotFound';
 import { Footer } from './components/Footer';
 import { SearchOverlay } from './components/SearchOverlay';
@@ -71,6 +73,8 @@ function AppContent() {
           <Route path="/debates/:debateId" element={<SingleDebate />} />
           <Route path="/collections/:id" element={<CollectionDetail />} />
           <Route path="/user/:username" element={<UserProfile />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
+          <Route path="/guidelines" element={<Guidelines />} />
 
           {/* Admin Routes */}
           <Route element={<AdminRoute />}>

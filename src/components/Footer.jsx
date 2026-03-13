@@ -59,11 +59,20 @@ export const Footer = () => {
                             COMMUNITY
                         </h4>
                         <div className="flex flex-col gap-[10px]">
-                            {['Reviews', 'Hot Debates', 'Collections', 'Leaderboard', 'Discord Server'].map((link) => (
+                            {['Reviews', 'Hot Debates', 'Collections'].map((link) => (
                                 <Link key={link} to="#" className="text-[14px] text-text-muted hover:text-white transition-colors inline-block w-fit">
                                     {link}
                                 </Link>
                             ))}
+                            <Link to="/leaderboard" className="text-[14px] text-text-muted hover:text-white transition-colors inline-block w-fit">
+                                Leaderboard
+                            </Link>
+                            <Link to="/guidelines" className="text-[14px] text-text-muted hover:text-white transition-colors inline-block w-fit">
+                                Guidelines
+                            </Link>
+                            <Link to="#" className="text-[14px] text-text-muted hover:text-white transition-colors inline-block w-fit">
+                                Discord Server
+                            </Link>
                         </div>
                     </div>
 
