@@ -1,0 +1,130 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.role == 'admin';
+    }
+
+    function isNotBanned() {
+      return isAuthenticated() &&
+             !exists(/databases/$(database)/documents/users/$(request.auth.uid)) ||
+             !get(/databases/$(database)/documents/users/$(request.auth.uid)).data.banned;
+    }
+
+    // Users collection
+    match /users/{userId} {
+      // Anyone can read user profiles (for public info)
+      allow read: if true;
+
+      // Users can create their own profile
+      allow create: if isAuthenticated() && request.auth.uid == userId && isNotBanned();
+
+      // Users can update their own profile (except sensitive fields)
+      allow update: if isOwner(userId) && isNotBanned() &&
+                    // Prevent updating banned status or admin status via client
+                    !request.resource.data.diff(resource.data).affectedKeys().hasAny(['banned', 'isAdmin']);
+
+      // Only admins can delete users or update banned/admin status
+      allow delete: if isAdmin();
+      allow update: if isAdmin();
+    }
+
+    // Reviews collection
+    match /reviews/{reviewId} {
+      // Anyone can read reviews
+      allow read: if true;
+
+      // Authenticated non-banned users can create reviews
+      allow create: if isAuthenticated() && isNotBanned() &&
+                    request.auth.uid == request.resource.data.uid;
+
+      // Only review author can update/delete their review
+      allow update, delete: if isAuthenticated() && isNotBanned() &&
+                             request.auth.uid == resource.data.uid;
+
+      // Admins can delete any review
+      allow delete: if isAdmin();
+    }
+
+    // Debates collection
+    match /debates/{debateId} {
+      // Anyone can read debates
+      allow read: if true;
+
+      // Authenticated non-banned users can create debates
+      allow create: if isAuthenticated() && isNotBanned() &&
+                    request.auth.uid == request.resource.data.creatorId;
+
+      // Only debate creator can update/delete their debate
+      allow update, delete: if isAuthenticated() && isNotBanned() &&
+                             request.auth.uid == resource.data.creatorId;
+
+      // Admins can delete any debate
+      allow delete: if isAdmin();
+    }
+
+    // Collections collection
+    match /collections/{collectionId} {
+      // Anyone can read collections
+      allow read: if true;
+
+      // Authenticated non-banned users can create collections
+      allow create: if isAuthenticated() && isNotBanned() &&
+                    request.auth.uid == request.resource.data.creatorId;
+
+      // Only collection creator can update/delete their collection
+      allow update, delete: if isAuthenticated() && isNotBanned() &&
+                             request.auth.uid == resource.data.creatorId;
+
+      // Admins can delete any collection
+      allow delete: if isAdmin();
+    }
+
+    // Game shelf subcollection (nested under users)
+    match /gameShelf/{userId}/games/{gameId} {
+      // Only the user can read/write their own shelf
+      allow read, write: if isOwner(userId) && isNotBanned();
+    }
+
+    // Reports collection (for user reports)
+    match /reports/{reportId} {
+      // Only authenticated users can create reports
+      allow create: if isAuthenticated() && isNotBanned();
+
+      // Only admins can read reports
+      allow read: if isAdmin();
+
+      // Admins can update/delete reports
+      allow update, delete: if isAdmin();
+    }
+
+    // Audit log (admin only)
+    match /audit/{entryId} {
+      // Only admins can read/write audit logs
+      allow read, write: if isAdmin();
+    }
+
+    // Announcements (admin only for write)
+    match /announcements/{announcementId} {
+      // Anyone can read announcements
+      allow read: if true;
+
+      // Only admins can create/update/delete announcements
+      allow write: if isAdmin();
+    }
+
+    // Default deny for any other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
