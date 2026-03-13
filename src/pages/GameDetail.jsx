@@ -4,16 +4,22 @@ import { rawg } from "../api/rawg";
 import { db } from "../firebase/firebase";
 import { collection, query, where, getDocs, orderBy, limit, doc, getDoc } from "firebase/firestore";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
+import SEO from "../components/SEO";
 import AddToShelfButton from "../components/AddToShelfButton";
 import VerdictModal from "../components/VerdictModal";
 import WriteReviewModal from "../components/WriteReviewModal";
 import Lightbox from "../components/Lightbox";
 import EmptyState from "../components/EmptyState";
-import { FaBookmark, FaShareAlt, FaCalendar, FaBuilding, FaGamepad, FaClock, FaThumbsUp, FaFlag } from "react-icons/fa";
+import { FiBookmark, FiShare2, FiCalendar, FiBriefcase, FiClock, FiFlag, FiArrowRight } from "react-icons/fi";
+import { HiThumbUp, HiThumbDown, HiMinus, HiSparkles } from "react-icons/hi2";
+import { BiJoystick } from "react-icons/bi";
+import SEO from "../components/SEO";
 
 export default function GameDetail() {
   const { gameId } = useParams();
   const { user } = useAuth();
+  const { addToast } = useToast();
   
   const [game, setGame] = useState(null);
   const [screenshots, setScreenshots] = useState([]);
@@ -183,6 +189,12 @@ export default function GameDetail() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white pt-16 font-inter pb-24">
+      <SEO 
+        title={game.name} 
+        description={`Read player verdicts and reviews for ${game.name}. Is it a Must Play or a Skip? Find out on GRIDLOCK.`}
+        image={game.background_image}
+        url={`/game/${gameId}`}
+      />
       
       {/* HERO SECTION */}
       <div className="relative w-full h-[480px] bg-[#111]">
@@ -220,9 +232,9 @@ export default function GameDetail() {
                     {game.metacritic} <span className="text-[11px] font-normal uppercase tracking-wider opacity-80 mt-0.5">Metacritic</span>
                   </span>
                 )}
-                <span className="flex items-center gap-1.5"><FaCalendar className="opacity-50"/> {new Date(game.released).getFullYear()}</span>
-                {game.developers?.[0] && <span className="flex items-center gap-1.5"><FaBuilding className="opacity-50"/> {game.developers[0].name}</span>}
-                {game.playtime > 0 && <span className="flex items-center gap-1.5"><FaClock className="opacity-50"/> {game.playtime} hrs avg</span>}
+                <span className="flex items-center gap-1.5"><FiCalendar className="opacity-50"/> {new Date(game.released).getFullYear()}</span>
+                {game.developers?.[0] && <span className="flex items-center gap-1.5"><FiBriefcase className="opacity-50"/> {game.developers[0].name}</span>}
+                {game.playtime > 0 && <span className="flex items-center gap-1.5"><FiClock className="opacity-50"/> {game.playtime} hrs avg</span>}
               </div>
             </div>
           </div>
@@ -230,26 +242,28 @@ export default function GameDetail() {
       </div>
 
       {/* ACTION BAR */}
-      <div className="bg-[#111] border-b border-[#1e1e1e] sticky top-16 z-40 py-4 mt-16 md:mt-10">
+      <div className="bg-[#111] border-b border-[#1e1e1e] sticky top-[64px] z-[90] py-4 mt-16 md:mt-10 backdrop-blur-md bg-opacity-90 transition-all">
         <div className="max-w-[1400px] mx-auto px-4 md:px-8 flex flex-wrap items-center gap-4">
           
-          <AddToShelfButton 
-             game={{ id: game.id, name: game.name, cover: game.background_image }} 
-             currentStatus={userShelfStatus} 
-             onStatusChange={setUserShelfStatus} 
-          />
+          <div className="group transition-transform hover:scale-105 active:scale-95 duration-200">
+            <AddToShelfButton 
+               game={{ id: game.id, name: game.name, cover: game.background_image }} 
+               currentStatus={userShelfStatus} 
+               onStatusChange={setUserShelfStatus} 
+            />
+          </div>
 
           {userVerdict ? (
             <button 
               onClick={() => setShowVerdictModal(true)}
-              className="h-10 px-6 font-syne font-bold rounded-lg border flex items-center gap-2 transition-all hover:opacity-80 border-transparent bg-black"
+              className="h-11 px-6 font-syne font-black rounded-lg border-2 border-[var(--accent)] flex items-center gap-2 transition-all hover:bg-[var(--accent)] hover:text-black group shadow-[0_0_20px_rgba(232,255,71,0.1)] hover:shadow-[0_0_30px_rgba(232,255,71,0.2)]"
             >
-               Your Verdict: <span style={{color: getVerdictMetadata(userVerdict).color}}>{getVerdictMetadata(userVerdict).label}</span>
+               Your Verdict: <span>{getVerdictMetadata(userVerdict).label}</span>
             </button>
           ) : (
             <button 
               onClick={() => user ? setShowVerdictModal(true) : addToast("Sign in to cast verdict", "error")}
-              className="h-10 px-6 bg-transparent border border-[#333] hover:bg-white/5 text-white font-syne font-bold rounded-lg transition-all text-[14px]"
+              className="h-11 px-8 bg-white text-black hover:bg-[var(--accent)] hover:scale-105 active:scale-95 text-black font-syne font-black rounded-lg transition-all text-[13px] uppercase tracking-wider"
             >
               Cast Your Verdict
             </button>
@@ -257,18 +271,18 @@ export default function GameDetail() {
 
           <button 
              onClick={() => user ? setShowReviewModal(true) : addToast("Sign in to write review", "error")}
-             className="h-10 px-4 text-[var(--text-muted)] hover:text-white font-medium text-[14px] transition-colors"
+             className="h-11 px-5 text-[var(--text-muted)] hover:text-white font-bold text-[14px] transition-colors border-2 border-transparent hover:border-[#333] rounded-lg"
           >
-            Write Review
+            Review
           </button>
           
           <div className="flex-1"></div>
 
-          <button className="w-10 h-10 rounded-full bg-[#161616] border border-[#2a2a2a] flex items-center justify-center text-[var(--text-muted)] hover:text-white hover:border-[#444] transition-all">
-            <FaBookmark />
+          <button className="w-11 h-11 rounded-lg bg-[#161616] border border-[#2a2a2a] flex items-center justify-center text-[var(--text-muted)] hover:text-white hover:border-[#444] transition-all hover:bg-[#222]">
+            <FiBookmark size={18} aria-hidden="true" />
           </button>
-          <button onClick={handleShare} className="w-10 h-10 rounded-full bg-[#161616] border border-[#2a2a2a] flex items-center justify-center text-[var(--text-muted)] hover:text-white hover:border-[#444] transition-all">
-            <FaShareAlt />
+          <button onClick={handleShare} className="w-11 h-11 rounded-lg bg-[#161616] border border-[#2a2a2a] flex items-center justify-center text-[var(--text-muted)] hover:text-white hover:border-[#444] transition-all hover:bg-[#222]">
+            <FiShare2 size={18} aria-hidden="true" />
           </button>
         </div>
       </div>
@@ -302,17 +316,18 @@ export default function GameDetail() {
 
              <div className="space-y-4">
                  {[
-                   { id: 'mustPlay', label: "Must Play", color: "#2ed573", icon: "🟢" },
-                   { id: 'goodEnough', label: "Good Enough", color: "#ffa502", icon: "🟡" },
-                   { id: 'skipIt', label: "Skip It", color: "#ff4757", icon: "🔴" },
-                   { id: 'masterpiece', label: "Masterpiece", color: "#a855f7", icon: "👑" },
+                   { id: 'mustPlay', label: "Must Play", color: "#2ed573", icon: HiThumbUp },
+                   { id: 'goodEnough', label: "Good Enough", color: "#ffa502", icon: HiMinus },
+                   { id: 'skipIt', label: "Skip It", color: "#ff4757", icon: HiThumbDown },
+                   { id: 'masterpiece', label: "Masterpiece", color: "#a855f7", icon: HiSparkles },
                  ].map(v => {
                      const count = verdictStats[v.id] || 0;
                      const percent = verdictStats.total > 0 ? Math.round((count / verdictStats.total) * 100) : 0;
                      return (
                          <div key={v.id} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 relative group">
-                             <div className="w-[120px] text-[13px] font-medium text-[var(--text-muted)] group-hover:text-white transition-colors flex items-center justify-between">
-                                 <span>{v.label}</span>
+                             <div className="w-[120px] text-[13px] font-medium text-[var(--text-muted)] group-hover:text-white transition-colors flex items-center gap-2">
+                                 <v.icon size={14} aria-hidden="true" />
+                                 <span className="flex-1">{v.label}</span>
                                  <span>{percent}%</span>
                              </div>
                              <div className="flex-1 h-3 bg-[#1a1a1a] rounded-full overflow-hidden border border-[#222]">
@@ -419,7 +434,7 @@ export default function GameDetail() {
 
                                <div className="mt-5 pt-4 border-t border-[#222] flex items-center gap-6">
                                     <button className="flex items-center gap-2 text-[12px] text-[var(--text-muted)] hover:text-[#2ed573] transition-colors font-medium">
-                                        <FaThumbsUp size={14} /> Helpful ({(review.likes || []).length})
+                                        <HiThumbUp size={14} aria-hidden="true" /> Helpful ({(review.likes || []).length})
                                     </button>
                                     <button className="text-[12px] text-[#666] hover:text-[#ff4757] transition-colors ml-auto">
                                         Report
@@ -429,13 +444,13 @@ export default function GameDetail() {
                       ))}
                   </div>
               ) : (
-                  <EmptyState 
-                      icon="✍️" 
-                      title="No reviews yet" 
-                      subtitle="Be the first player to share your thoughts on this game."
-                      ctaText="Write a Review →" 
-                      onCtaClick={() => user ? setShowReviewModal(true) : alert("Sign in to review")}
-                  />
+                   <EmptyState 
+                       icon={<BiJoystick size={48} />} 
+                       title="No reviews yet" 
+                       subtitle="Be the first player to share your thoughts on this game."
+                       ctaText={<>Write a Review <FiArrowRight size={16} aria-hidden="true" /></>} 
+                       onCtaClick={() => user ? setShowReviewModal(true) : alert("Sign in to review")}
+                   />
               )}
           </section>
 
@@ -491,7 +506,7 @@ export default function GameDetail() {
                      {game.stores?.length > 0 ? game.stores.map((s) => (
                          <a key={s.store.id} href={`https://${s.store.domain}`} target="_blank" rel="noreferrer" className="flex items-center justify-between p-3 bg-[#161616] border border-[#222] rounded-lg hover:border-[var(--accent)] hover:bg-[#1a1a1a] transition-all group">
                              <div className="text-[14px] font-medium">{s.store.name}</div>
-                             <div className="text-[var(--text-muted)] text-[12px] group-hover:text-[var(--accent)]">Get →</div>
+                             <div className="text-[var(--text-muted)] text-[12px] group-hover:text-[var(--accent)] flex items-center gap-1">Get <FiArrowRight size={14} aria-hidden="true" /></div>
                          </a>
                      )) : (
                          <div className="text-[13px] text-[var(--text-muted)] italic">Store data not available.</div>

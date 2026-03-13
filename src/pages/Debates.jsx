@@ -3,7 +3,10 @@ import { Link } from "react-router-dom";
 import { db } from "../firebase/firebase";
 import { collection, query, orderBy, getDocs } from "firebase/firestore";
 import EmptyState from "../components/EmptyState";
-import { FaFire, FaClock, FaThumbsUp, FaThumbsDown } from "react-icons/fa";
+import SEO from "../components/SEO";
+import { FiClock, FiThumbsUp, FiThumbsDown, FiArrowRight } from "react-icons/fi";
+import { FaFire } from "react-icons/fa";
+import { BiMessageSquareDetail } from "react-icons/bi";
 
 export default function Debates() {
   const [debates, setDebates] = useState([]);
@@ -65,12 +68,13 @@ export default function Debates() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white pt-[72px]">
+        <SEO title="Community Debates" description="Join the conversation. Weigh in on the biggest gaming debates of 2025." />
         <div className="w-full bg-[#111] py-12 px-4 md:px-8 border-b border-[#1e1e1e] relative overflow-hidden">
             <div className="absolute top-0 right-0 w-80 h-80 bg-[var(--accent)] filter blur-[150px] opacity-[0.05] pointer-events-none"></div>
             
             <div className="max-w-[900px] mx-auto text-center relative z-10">
-                 <h1 className="font-syne text-[48px] md:text-[64px] font-black leading-none mb-4 tracking-tight drop-shadow-lg flex items-center justify-center gap-4">
-                     Hot Debates <span className="text-[var(--accent)] text-[40px]">🔥</span>
+                 <h1 className="font-syne text-[48px] md:text-[64px] font-black leading-none mb-4 tracking-tight drop-shadow-lg flex items-center justify-center gap-4 uppercase">
+                     Community Debates
                  </h1>
                  <p className="text-[var(--text-muted)] text-[16px] md:text-[20px] max-w-2xl mx-auto">
                      The internet has opinions. What are yours?
@@ -81,13 +85,13 @@ export default function Debates() {
                          onClick={() => setActiveTab('hot')}
                          className={`h-12 px-8 rounded-full font-bold text-[14px] transition-all flex items-center gap-2 ${activeTab === 'hot' ? 'bg-[var(--accent)] text-black' : 'bg-[#161616] text-[#888] border border-[#2a2a2a] hover:text-white'}`}
                      >
-                         <FaFire /> Hot
+                         <FaFire /> Trending
                      </button>
                      <button
                          onClick={() => setActiveTab('new')}
                          className={`h-12 px-8 rounded-full font-bold text-[14px] transition-all flex items-center gap-2 ${activeTab === 'new' ? 'bg-[var(--accent)] text-black' : 'bg-[#161616] text-[#888] border border-[#2a2a2a] hover:text-white'}`}
                      >
-                         <FaClock /> New
+                         <FiClock /> Recent
                      </button>
                  </div>
             </div>
@@ -123,8 +127,8 @@ export default function Debates() {
                                            </h2>
                                            
                                            <div className="flex items-center gap-3 text-[12px] text-[#666] font-medium mt-4">
-                                               <span className="flex items-center gap-1.5"><FaThumbsUp className="text-[#2ed573]"/> {debate.agreeCount || 0}</span>
-                                               <span className="flex items-center gap-1.5"><FaThumbsDown className="text-[#ff4757]"/> {debate.disagreeCount || 0}</span>
+                                               <span className="flex items-center gap-1.5"><FiThumbsUp className="text-[#2ed573]"/> {debate.agreeCount || 0}</span>
+                                               <span className="flex items-center gap-1.5"><FiThumbsDown className="text-[#ff4757]"/> {debate.disagreeCount || 0}</span>
                                                <span className="ml-auto opacity-50">{new Date(debate.createdAt).toLocaleDateString()}</span>
                                            </div>
                                            
@@ -137,9 +141,9 @@ export default function Debates() {
                                       {/* Action */}
                                       <Link 
                                          to={`/debates/${debate.id}`} 
-                                         className="w-full md:w-auto mt-4 md:mt-0 px-6 h-12 bg-[#111] border border-[#2a2a2a] rounded-[10px] font-syne font-bold hover:bg-white hover:text-black flex items-center justify-center transition-all shrink-0"
+                                         className="w-full md:w-auto mt-4 md:mt-0 px-6 h-12 bg-[#111] border border-[#2a2a2a] rounded-[10px] font-syne font-bold hover:bg-white hover:text-black flex items-center justify-center transition-all shrink-0 gap-2"
                                       >
-                                          Join Debate →
+                                          Join Debate <FiArrowRight size={16} aria-hidden="true" />
                                       </Link>
                                   </div>
                              </div>
@@ -147,7 +151,7 @@ export default function Debates() {
                      })}
                  </div>
              ) : (
-                 <EmptyState icon="🗣️" title="No debates found" subtitle="The community is very quiet right now." />
+                 <EmptyState icon={<BiMessageSquareDetail size={48} />} title="Silence in the arena" subtitle="No active debates found. Start a conversation or check back later." />
              )}
         </div>
     </div>

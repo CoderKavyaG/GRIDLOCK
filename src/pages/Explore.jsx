@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { FaSearch, FaTimes } from "react-icons/fa";
+import { FiSearch, FiX, FiArrowRight } from "react-icons/fi";
+import { BiJoystick } from "react-icons/bi";
 import { rawg } from "../api/rawg";
 import GameCard from "../components/GameCard";
 import SkeletonCard from "../components/SkeletonCard";
 import EmptyState from "../components/EmptyState";
+import SEO from "../components/SEO";
 
 // RAWG map ids
 const GENRES_MAP = {
@@ -128,13 +130,14 @@ export default function Explore() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white pt-[72px]">
+      <SEO title="Explore Games" description="Discover over 500,000 games with advanced filters and community verdicts." />
       {/* HEADER & SEARCH */}
       <div className="w-full bg-[#111] py-12 px-4 md:px-8 border-b border-[#1e1e1e]">
          <div className="max-w-[1400px] mx-auto">
              <h1 className="font-syne text-[40px] md:text-[48px] font-black mb-8 leading-none">Explore Games</h1>
              
              <div className="relative max-w-2xl">
-                <FaSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={18} />
+                <FiSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={18} aria-hidden="true" />
                 <input 
                   type="text" 
                   value={query}
@@ -145,9 +148,9 @@ export default function Explore() {
                 {query && (
                   <button 
                     onClick={() => setQuery("")}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-white bg-[#222] p-1.5 rounded-md"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-white bg-[#222] p-1.5 rounded-md transition-colors"
                   >
-                    <FaTimes size={12} />
+                    <FiX size={12} aria-hidden="true" />
                   </button>
                 )}
              </div>
@@ -266,10 +269,10 @@ export default function Explore() {
              </>
          ) : (
              <EmptyState 
-                icon="🔍"
-                title="No games found."
-                subtitle="Try adjusting your search or filters to find what you're looking for."
-                ctaText="Clear Filters"
+                icon={<BiJoystick size={48} />}
+                title="No results found"
+                subtitle="Try adjusting your search or filters to broaden your search."
+                ctaText={<>Clear All Filters <FiX size={16} aria-hidden="true" /></>}
                 onCtaClick={clearAllFilters}
              />
          )}

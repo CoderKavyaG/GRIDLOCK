@@ -6,13 +6,16 @@ import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import GameCard from "../components/GameCard";
 import EmptyState from "../components/EmptyState";
-import { FaCheck, FaGamepad, FaListAlt, FaTimes, FaThLarge, FaList } from "react-icons/fa";
+import SEO from "../components/SEO";
+import { FiCheck, FiX, FiGrid, FiList, FiArrowRight } from "react-icons/fi";
+import { BiJoystick } from "react-icons/bi";
+import { BsCollectionPlay } from "react-icons/bs";
 
 const SHELF_TABS = [
-  { id: "played", label: "Played", icon: <FaCheck />, color: "#2ed573" },
-  { id: "playing", label: "Playing", icon: <FaGamepad />, color: "#3498db" },
-  { id: "wantToPlay", label: "Want to Play", icon: <FaListAlt />, color: "#f39c12" },
-  { id: "dropped", label: "Dropped", icon: <FaTimes />, color: "#e74c3c" },
+  { id: "played", label: "Played", icon: <FiCheck />, color: "#2ed573" },
+  { id: "playing", label: "Playing", icon: <BiJoystick />, color: "#3498db" },
+  { id: "wantToPlay", label: "Want to Play", icon: <BsCollectionPlay />, color: "#f39c12" },
+  { id: "dropped", label: "Dropped", icon: <FiX />, color: "#e74c3c" },
 ];
 
 export default function GameShelf({ embedded = false, uid = null }) {
@@ -118,6 +121,7 @@ export default function GameShelf({ embedded = false, uid = null }) {
 
   return (
     <div className={`text-white ${!embedded ? 'min-h-screen bg-[#0a0a0a] pt-24 pb-16 px-4 md:px-8 max-w-[1400px] mx-auto' : ''}`}>
+      {!embedded && <SEO title="My Game Shelf" description="Track every game you've played, abandoned, or plan to start." />}
       
       {!embedded && (
         <div className="mb-12">
@@ -163,18 +167,18 @@ export default function GameShelf({ embedded = false, uid = null }) {
               </select>
               
               <div className="flex bg-[#111] border border-[#2a2a2a] rounded-lg p-0.5">
-                  <button 
-                     onClick={() => setViewMode('grid')}
-                     className={`w-8 h-8 rounded-md flex items-center justify-center transition-all ${viewMode === 'grid' ? 'bg-[#222] text-white' : 'text-[#666] hover:text-white'}`}
-                  >
-                     <FaThLarge size={14} />
-                  </button>
-                  <button 
-                     onClick={() => setViewMode('list')}
-                     className={`w-8 h-8 rounded-md flex items-center justify-center transition-all ${viewMode === 'list' ? 'bg-[#222] text-white' : 'text-[#666] hover:text-white'}`}
-                  >
-                     <FaList size={14} />
-                  </button>
+                   <button 
+                      onClick={() => setViewMode('grid')}
+                      className={`w-8 h-8 rounded-md flex items-center justify-center transition-all ${viewMode === 'grid' ? 'bg-[#222] text-white' : 'text-[#666] hover:text-white'}`}
+                   >
+                      <FiGrid size={14} aria-hidden="true" />
+                   </button>
+                   <button 
+                      onClick={() => setViewMode('list')}
+                      className={`w-8 h-8 rounded-md flex items-center justify-center transition-all ${viewMode === 'list' ? 'bg-[#222] text-white' : 'text-[#666] hover:text-white'}`}
+                   >
+                      <FiList size={14} aria-hidden="true" />
+                   </button>
               </div>
           </div>
       </div>
@@ -193,15 +197,14 @@ export default function GameShelf({ embedded = false, uid = null }) {
                               <img src={game.coverImage} alt={game.gameName} className="w-full h-full object-cover" />
                               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
                                   <div className="font-bold text-[14px] text-white leading-tight drop-shadow-md">{game.gameName}</div>
-                                  
-                                  {isOwnShelf && (
-                                     <button 
-                                        onClick={(e) => handleRemove(game.id, e)}
-                                        className="absolute top-2 right-2 w-8 h-8 bg-red-500/80 text-white rounded-full flex items-center justify-center backdrop-blur-md opacity-0 group-hover:opacity-100 hover:bg-red-500 transition-all scale-75 hover:scale-100"
-                                     >
-                                         <FaTimes size={12} />
-                                     </button>
-                                  )}
+                                                                    {isOwnShelf && (
+                                      <button 
+                                         onClick={(e) => handleRemove(game.id, e)}
+                                         className="absolute top-2 right-2 w-8 h-8 bg-[#ff4757]/80 text-white rounded-full flex items-center justify-center backdrop-blur-md opacity-0 group-hover:opacity-100 hover:bg-[#ff4757] transition-all scale-75 hover:scale-100"
+                                      >
+                                          <FiX size={12} aria-hidden="true" />
+                                      </button>
+                                   )}
                               </div>
                           </div>
                       </Link>
@@ -216,14 +219,14 @@ export default function GameShelf({ embedded = false, uid = null }) {
                               <div className="font-bold text-[16px] text-white truncate group-hover:text-[var(--accent)] transition-colors">{game.gameName}</div>
                               <div className="text-[12px] text-[#666] mt-0.5">Added {new Date(game.addedAt || game.updatedAt).toLocaleDateString()}</div>
                           </div>
-                          {isOwnShelf && (
-                              <button 
-                                 onClick={(e) => handleRemove(game.id, e)}
-                                 className="w-10 h-10 flex items-center justify-center text-[#ff4757] opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[rgba(255,71,87,0.1)] rounded-full mr-2"
-                              >
-                                  <FaTimes />
-                              </button>
-                          )}
+                           {isOwnShelf && (
+                               <button 
+                                  onClick={(e) => handleRemove(game.id, e)}
+                                  className="w-10 h-10 flex items-center justify-center text-[#ff4757] opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#ff4757]/10 rounded-full mr-2"
+                               >
+                                   <FiX size={16} aria-hidden="true" />
+                               </button>
+                           )}
                       </Link>
                   ))}
               </div>
@@ -231,9 +234,9 @@ export default function GameShelf({ embedded = false, uid = null }) {
       ) : (
           <EmptyState 
              icon={SHELF_TABS.find(t=>t.id===activeTab).icon}
-             title={`${SHELF_TABS.find(t=>t.id===activeTab).label} is empty`} 
-             subtitle="Nothing to see here right now." 
-             ctaText="Explore Games" 
+             title="Your shelf is empty" 
+             subtitle={`You haven't added any games to your "${SHELF_TABS.find(t=>t.id===activeTab).label}" list yet.`} 
+             ctaText={<>Discover Games <FiArrowRight size={16} aria-hidden="true" /></>} 
              ctaLink="/explore" 
           />
       )}
