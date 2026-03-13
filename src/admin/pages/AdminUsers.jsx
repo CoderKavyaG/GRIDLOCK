@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
-import { collection, query, orderBy, limit, startAfter, getDocs, doc, updateDoc, where } from "firebase/firestore";
+import { collection, query, orderBy, limit, startAfter, getDocs, doc, updateDoc, addDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
+import { useAuth } from "../../context/AuthContext";
 import PageSkeleton from "../../components/PageSkeleton";
 
 const USERS_PER_PAGE = 20;
 
 export default function AdminUsers() {
+  const { user } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -13,6 +15,22 @@ export default function AdminUsers() {
   const [lastDoc, setLastDoc] = useState(null);
   const [hasMore, setHasMore] = useState(true);
   const [updating, setUpdating] = useState(null); // user id being updated
+
+  const logAction = async (action, targetId, details = "") => {
+    try {
+      await addDoc(collection(db, "audit"), {
+        action,
+        adminId: user.uid,
+        adminUsername: user.displayName || user.email?.split("@")[0],
+        targetType: "user",
+        targetId,
+        details,
+        timestamp: new Date().toISOString()
+      });
+    } catch (err) {
+      console.error("Audit log error:", err);
+    }
+  };
 
   const loadUsers = async (reset = false) => {
     setLoading(true);
@@ -78,6 +96,7 @@ export default function AdminUsers() {
       setUsers((prev) =>
         prev.map((u) => (u.id === userId ? { ...u, banned: !currentlyBanned } : u))
       );
+      await logAction(currentlyBanned ? "unban user" : "ban user", userId);
     } catch (err) {
       console.error("Toggle ban error:", err);
       setError("Failed to update user status.");
@@ -95,7 +114,7 @@ export default function AdminUsers() {
       setUsers((prev) =>
         prev.map((u) => (u.id === userId ? { ...u, isAdmin: !currentlyAdmin } : u))
       );
-      // Note: Run scripts/set-admin.js to update Firebase custom claims
+      await logAction(currentlyAdmin ? "remove admin" : "grant admin", userId);
     } catch (err) {
       console.error("Toggle admin error:", err);
       setError("Failed to update admin status.");
