@@ -25,4 +25,10 @@ dist-ssr
 
 .env
 .env.local
+
+# Firebase admin service account
+serviceAccountKey.json
+
+# Admin helper scripts
+scripts/set-admin.js
     

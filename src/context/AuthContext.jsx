@@ -12,17 +12,23 @@ export function useAuth() {
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
-      
+
       if (currentUser) {
         try {
+          // Force refresh token to ensure custom claims are up to date.
+          await currentUser.getIdToken(true);
+          const idTokenResult = await currentUser.getIdTokenResult();
+          setIsAdmin(idTokenResult.claims?.role === 'admin');
+
           const userRef = doc(db, "users", currentUser.uid);
           const userSnap = await getDoc(userRef);
-          
+
           if (userSnap.exists()) {
             setUserProfile(userSnap.data());
           } else {
@@ -42,11 +48,13 @@ export function AuthProvider({ children }) {
           }
         } catch (error) {
           console.error("Error fetching user profile:", error);
+          setIsAdmin(false);
         }
       } else {
         setUserProfile(null);
+        setIsAdmin(false);
       }
-      
+
       setLoading(false);
     });
 
@@ -60,6 +68,7 @@ export function AuthProvider({ children }) {
   const value = {
     user,
     userProfile,
+    isAdmin,
     loading,
     signOut
   };

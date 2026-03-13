@@ -25,6 +25,18 @@ import NotFound from './pages/NotFound';
 import { Footer } from './components/Footer';
 import { SearchOverlay } from './components/SearchOverlay';
 
+import AdminRoute from './components/AdminRoute';
+import AdminLayout from './admin/AdminLayout';
+import AdminDashboard from './admin/pages/AdminDashboard';
+import AdminUsers from './admin/pages/AdminUsers';
+import AdminUserDetail from './admin/pages/AdminUserDetail';
+import AdminReviews from './admin/pages/AdminReviews';
+import AdminDebates from './admin/pages/AdminDebates';
+import AdminReports from './admin/pages/AdminReports';
+import AdminAnalytics from './admin/pages/AdminAnalytics';
+import AdminAnnouncements from './admin/pages/AdminAnnouncements';
+import AdminAuditLog from './admin/pages/AdminAuditLog';
+
 function App() {
   return (
     <HelmetProvider>
@@ -58,7 +70,22 @@ function AppContent() {
           <Route path="/debates/:debateId" element={<SingleDebate />} />
           <Route path="/collections/:id" element={<CollectionDetail />} />
           <Route path="/user/:username" element={<UserProfile />} />
-          
+
+          {/* Admin Routes */}
+          <Route element={<AdminRoute />}>
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<AdminDashboard />} />
+              <Route path="users" element={<AdminUsers />} />
+              <Route path="users/:uid" element={<AdminUserDetail />} />
+              <Route path="reviews" element={<AdminReviews />} />
+              <Route path="debates" element={<AdminDebates />} />
+              <Route path="reports" element={<AdminReports />} />
+              <Route path="analytics" element={<AdminAnalytics />} />
+              <Route path="announcements" element={<AdminAnnouncements />} />
+              <Route path="audit-log" element={<AdminAuditLog />} />
+            </Route>
+          </Route>
+
           {/* Protected Routes */}
           <Route element={<ProtectedRoute />}>
             <Route path="/profile" element={<MyProfile />} />
