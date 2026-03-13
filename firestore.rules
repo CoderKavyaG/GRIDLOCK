@@ -89,10 +89,18 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // Game shelf subcollection (nested under users)
-    match /gameShelf/{userId}/games/{gameId} {
-      // Only the user can read/write their own shelf
-      allow read, write: if isOwner(userId) && isNotBanned();
+    // Follows collection
+    match /follows/{followId} {
+      // Only authenticated users can create follows
+      allow create: if isAuthenticated() && isNotBanned() &&
+                    request.auth.uid == request.resource.data.followerId;
+
+      // Only the follower can read/delete their follows
+      allow read, delete: if isAuthenticated() && isNotBanned() &&
+                           request.auth.uid == resource.data.followerId;
+
+      // Admins can read all follows
+      allow read: if isAdmin();
     }
 
     // Reports collection (for user reports)

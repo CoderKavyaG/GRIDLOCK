@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { collection, query, where, getDocs, limit } from "firebase/firestore";
+import { collection, query, where, getDocs, limit, addDoc, deleteDoc, getCountFromServer } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import { useAuth } from "../context/AuthContext";
 import EmptyState from "../components/EmptyState";
-import { FaShareAlt, FaGamepad } from "react-icons/fa";
+import { FaShareAlt, FaGamepad, FaUserPlus, FaUserCheck } from "react-icons/fa";
 
 export default function UserProfile() {
   const { username } = useParams();
@@ -19,6 +19,12 @@ export default function UserProfile() {
   const [recentReviews, setRecentReviews] = useState([]);
   const [verdictStats, setVerdictStats] = useState({ mustPlay: 0, goodEnough: 0, skipIt: 0, masterpiece: 0, total: 0 });
   const [publicCollections, setPublicCollections] = useState([]);
+
+  // Follow system
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followerCount, setFollowerCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const [followLoading, setFollowLoading] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -78,6 +84,28 @@ export default function UserProfile() {
         collSnap.forEach(d => collList.push({ id: d.id, ...d.data() }));
         setPublicCollections(collList);
 
+        // Follow stats
+        if (user && user.uid !== uid) {
+          // Check if current user follows this profile
+          const followQ = query(
+            collection(db, "follows"),
+            where("followerId", "==", user.uid),
+            where("followingId", "==", uid)
+          );
+          const followSnap = await getDocs(followQ);
+          setIsFollowing(!followSnap.empty);
+        }
+
+        // Follower count
+        const followerQ = query(collection(db, "follows"), where("followingId", "==", uid));
+        const followerCount = await getCountFromServer(followerQ);
+        setFollowerCount(followerCount.data().count);
+
+        // Following count
+        const followingQ = query(collection(db, "follows"), where("followerId", "==", uid));
+        const followingCount = await getCountFromServer(followingQ);
+        setFollowingCount(followingCount.data().count);
+
       } catch (err) {
         console.error("Error fetching user profile:", err);
         setNotFound(true);
@@ -89,8 +117,39 @@ export default function UserProfile() {
     fetchProfile();
   }, [username]);
 
-  const handleShare = () => {
-    navigator.clipboard.writeText(window.location.href);
+  const handleFollow = async () => {
+    if (!user || followLoading) return;
+
+    setFollowLoading(true);
+    try {
+      if (isFollowing) {
+        // Unfollow
+        const followQ = query(
+          collection(db, "follows"),
+          where("followerId", "==", user.uid),
+          where("followingId", "==", profile.id)
+        );
+        const followSnap = await getDocs(followQ);
+        if (!followSnap.empty) {
+          await deleteDoc(followSnap.docs[0].ref);
+        }
+        setIsFollowing(false);
+        setFollowerCount(prev => Math.max(0, prev - 1));
+      } else {
+        // Follow
+        await addDoc(collection(db, "follows"), {
+          followerId: user.uid,
+          followingId: profile.id,
+          createdAt: new Date().toISOString()
+        });
+        setIsFollowing(true);
+        setFollowerCount(prev => prev + 1);
+      }
+    } catch (err) {
+      console.error("Follow error:", err);
+    } finally {
+      setFollowLoading(false);
+    }
   };
 
   const calcPct = (val) => verdictStats.total > 0 ? Math.round((val / verdictStats.total) * 100) : 0;
@@ -159,6 +218,29 @@ export default function UserProfile() {
 
             {/* Actions */}
             <div className="flex gap-3">
+              {!isOwnProfile && user && (
+                <button
+                  onClick={handleFollow}
+                  disabled={followLoading}
+                  className={`px-5 h-10 rounded-lg font-syne font-bold transition-all flex items-center gap-2 text-[13px] ${
+                    isFollowing
+                      ? "bg-[#161616] border border-[#2a2a2a] hover:border-white text-white"
+                      : "bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-black"
+                  } disabled:opacity-50`}
+                >
+                  {followLoading ? (
+                    "..."
+                  ) : isFollowing ? (
+                    <>
+                      <FaUserCheck /> Following
+                    </>
+                  ) : (
+                    <>
+                      <FaUserPlus /> Follow
+                    </>
+                  )}
+                </button>
+              )}
               {isOwnProfile && (
                 <Link to="/settings" className="px-5 h-10 bg-[#161616] border border-[#2a2a2a] rounded-lg font-syne font-bold hover:border-white transition-all flex items-center text-[13px]">
                   Edit Profile
@@ -175,8 +257,8 @@ export default function UserProfile() {
             {[
               { label: "Games Played", val: stats.played, color: "#2ed573" },
               { label: "Reviews", val: stats.reviews, color: "var(--accent)" },
-              { label: "Collections", val: publicCollections.length, color: "#a855f7" },
-              { label: "Taste Score", val: verdictStats.total > 5 ? "Active" : "New", isText: true, color: "#3498db" },
+              { label: "Followers", val: followerCount, color: "#e74c3c" },
+              { label: "Following", val: followingCount, color: "#f39c12" },
             ].map((s, i) => (
               <div key={i} className="bg-[#161616] border border-[#222] rounded-xl p-5 text-center hover:border-[#333] transition-colors">
                 <div className={`font-syne text-[32px] font-black leading-none mb-1`} style={{ color: s.color }}>
