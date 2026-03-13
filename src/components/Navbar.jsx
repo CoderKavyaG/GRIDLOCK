@@ -25,6 +25,7 @@ export const Navbar = () => {
     ];
 
     if (user) {
+        navLinks.splice(1, 0, { name: 'Feed', path: '/feed' }); // Insert after Discover
         navLinks.push({ name: 'Collections', path: '/collections' });
         navLinks.push({ name: 'Shelf', path: '/shelf' });
     }
