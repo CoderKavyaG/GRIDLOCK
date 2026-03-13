@@ -4,13 +4,16 @@ import { doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
-import { FaChevronDown, FaCheck, FaGamepad, FaListAlt, FaTimes } from "react-icons/fa";
+import { FiChevronDown, FiCheck, FiPlus, FiX } from "react-icons/fi";
+import { HiSparkles, HiThumbUp, HiMinus, HiThumbDown } from "react-icons/hi2";
+import { BiJoystick } from "react-icons/bi";
+import { BsCollectionPlay } from "react-icons/bs";
 
 const SHELF_STATUS = [
-  { id: "played", label: "Played", icon: <FaCheck />, color: "#2ed573" },
-  { id: "playing", label: "Currently Playing", icon: <FaGamepad />, color: "#3498db" },
-  { id: "wantToPlay", label: "Want to Play", icon: <FaListAlt />, color: "#f39c12" },
-  { id: "dropped", label: "Dropped", icon: <FaTimes />, color: "#e74c3c" },
+  { id: "played", label: "Played", icon: <FiCheck />, color: "#2ed573" },
+  { id: "playing", label: "Currently Playing", icon: <BiJoystick />, color: "#3498db" },
+  { id: "wantToPlay", label: "Want to Play", icon: <BsCollectionPlay />, color: "#f39c12" },
+  { id: "dropped", label: "Dropped", icon: <FiX />, color: "#e74c3c" },
 ];
 
 export default function AddToShelfButton({ game, currentStatus, onStatusChange }) {
@@ -63,9 +66,9 @@ export default function AddToShelfButton({ game, currentStatus, onStatusChange }
     return (
       <Link 
         to="/login"
-        className="h-10 px-4 bg-[var(--accent)] text-black font-syne font-bold rounded-lg hover:brightness-105 transition-all text-[14px] flexItems-center inline-flex"
+        className="h-10 px-4 bg-[var(--accent)] text-black font-syne font-bold rounded-lg hover:brightness-105 transition-all text-[14px] items-center inline-flex gap-2"
       >
-        <span className="flex items-center">+ Add to Shelf</span>
+        <FiPlus size={16} aria-hidden="true" /> Add to Shelf
       </Link>
     );
   }
@@ -89,10 +92,10 @@ export default function AddToShelfButton({ game, currentStatus, onStatusChange }
           <>
             <span style={{ color: currentStatusObj.color }}>{currentStatusObj.icon}</span>
             {currentStatusObj.label}
-            <FaChevronDown size={10} className="ml-1 opacity-70" />
+            <FiChevronDown size={14} className="ml-1 opacity-70" aria-hidden="true" />
           </>
         ) : (
-          <>+ Add to Shelf</>
+          <><FiPlus size={16} aria-hidden="true" /> Add to Shelf</>
         )}
       </button>
 
@@ -113,7 +116,7 @@ export default function AddToShelfButton({ game, currentStatus, onStatusChange }
                 {status.icon}
               </span>
               {status.label}
-              {currentStatus === status.id && <FaCheck className="ml-auto text-white/50" size={12} />}
+              {currentStatus === status.id && <FiCheck className="ml-auto text-white/50" size={12} aria-hidden="true" />}
             </button>
           ))}
         </div>

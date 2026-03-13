@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { rawg } from '../api/rawg';
 import { useGames } from '../hooks/useGames';
-import { FiStar, FiCalendar, FiMonitor } from 'react-icons/fi';
+import { FiStar, FiCalendar, FiMonitor, FiArrowRight, FiPlus } from 'react-icons/fi';
 import { IoGameControllerOutline } from 'react-icons/io5';
+import { HiThumbUp, HiMinus, HiThumbDown } from 'react-icons/hi2';
+import { BiTrendingUp } from 'react-icons/bi';
+import { Link } from 'react-router-dom';
 
 export const Hero = () => {
     const { data: games, loading, error } = useGames(rawg.heroGames);
@@ -21,7 +24,7 @@ export const Hero = () => {
     if (loading) {
         return (
             <div className="w-full h-screen bg-[#0a0a0a] flex items-center justify-center">
-                <div className="text-text-muted font-inter">Loading universe...</div>
+                <div className="text-text-muted font-inter">Preparing your feed...</div>
             </div>
         );
     }
@@ -55,9 +58,9 @@ export const Hero = () => {
 
     // Mock verdict data
     const verdictMocks = [
-        { label: 'Must Play', percent: 67, colorClass: 'text-[#2ed573]', bgClass: 'bg-[#2ed573]/10 border-[#2ed573]/30', icon: '🟢' },
-        { label: 'Good Enough', percent: 22, colorClass: 'text-[#ffa502]', bgClass: 'bg-[#ffa502]/10 border-[#ffa502]/30', icon: '🟡' },
-        { label: 'Skip It', percent: 11, colorClass: 'text-[#ff4757]', bgClass: 'bg-[#ff4757]/10 border-[#ff4757]/30', icon: '🔴' }
+        { label: 'Must Play', percent: 67, colorClass: 'text-[#2ed573]', bgClass: 'bg-[#2ed573]/10 border-[#2ed573]/30', icon: HiThumbUp },
+        { label: 'Good Enough', percent: 22, colorClass: 'text-[#ffa502]', bgClass: 'bg-[#ffa502]/10 border-[#ffa502]/30', icon: HiMinus },
+        { label: 'Skip It', percent: 11, colorClass: 'text-[#ff4757]', bgClass: 'bg-[#ff4757]/10 border-[#ff4757]/30', icon: HiThumbDown }
     ];
 
     const textVariants = {
@@ -120,7 +123,7 @@ export const Hero = () => {
                             key={`eyebrow-${activeGame.id}`}
                             className="inline-flex max-w-max items-center justify-center px-3 py-1 bg-[#e8ff47]/10 border border-[#e8ff47]/30 rounded-full text-accent text-[11px] uppercase tracking-[0.2em] font-bold"
                         >
-                            🔥 Trending Right Now
+                            <BiTrendingUp size={14} className="mr-2" aria-hidden="true" /> TRENDING THIS WEEK
                         </motion.div>
 
                         {/* Game Title */}
@@ -168,8 +171,8 @@ export const Hero = () => {
                             <span className="text-[11px] uppercase text-text-muted tracking-[0.1em]">Community says:</span>
                             <div className="flex flex-wrap items-center gap-3">
                                 {verdictMocks.map((v, i) => (
-                                    <div key={i} className={`flex items-center gap-1 ${v.bgClass} border rounded-full px-3 py-1 ${v.colorClass} text-[12px] font-[600]`}>
-                                        <span>{v.icon}</span> {v.percent}% {v.label}
+                                    <div key={i} className={`flex items-center gap-1.5 ${v.bgClass} border rounded-full px-3 py-1 ${v.colorClass} text-[12px] font-[600]`}>
+                                        <v.icon size={14} aria-hidden="true" /> {v.percent}% {v.label}
                                     </div>
                                 ))}
                             </div>
@@ -183,11 +186,14 @@ export const Hero = () => {
                             key={`cta-${activeGame.id}`}
                             className="flex flex-row items-center gap-3 mt-2"
                         >
-                            <button className="bg-accent text-black font-[700] text-[15px] px-[32px] py-[14px] rounded-[8px] hover:brightness-105 hover:-translate-y-[1px] transition-all">
-                                Explore Game &rarr;
-                            </button>
-                            <button className="bg-transparent border border-white/25 text-white font-[700] text-[15px] px-[32px] py-[14px] rounded-[8px] hover:bg-white/10 hover:border-white/50 transition-all">
-                                + Add to Backlog
+                            <Link
+                                to={`/game/${activeGame.id}`}
+                                className="bg-accent text-black font-[700] text-[15px] px-[32px] py-[14px] rounded-[8px] hover:brightness-105 hover:-translate-y-[1px] transition-all flex items-center gap-2"
+                            >
+                                View Details <FiArrowRight size={18} aria-hidden="true" />
+                            </Link>
+                            <button className="bg-transparent border border-white/25 text-white font-[700] text-[15px] px-[32px] py-[14px] rounded-[8px] hover:bg-white/10 hover:border-white/50 transition-all flex items-center gap-2">
+                                <FiPlus size={18} aria-hidden="true" /> Add to Shelf
                             </button>
                         </motion.div>
                     </div>

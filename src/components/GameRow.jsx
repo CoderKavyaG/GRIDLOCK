@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { GameCard } from './GameCard';
 import { SkeletonCard } from './SkeletonCard';
 import { Link } from 'react-router-dom';
+import { FiArrowRight } from 'react-icons/fi';
 
 export const GameRow = ({ title, chipLabel, chipColor, games, loading, error, seeAllHref, showRank = false }) => {
     // Determine text color for chip based on background
@@ -45,8 +46,8 @@ export const GameRow = ({ title, chipLabel, chipColor, games, loading, error, se
                 </div>
 
                 {seeAllHref && (
-                    <Link to={seeAllHref} className="text-[13px] text-text-muted hover:text-white transition-colors duration-150 whitespace-nowrap mb-1">
-                        See All &rarr;
+                    <Link to={seeAllHref} className="text-[13px] text-text-muted hover:text-white transition-colors duration-150 whitespace-nowrap mb-1 flex items-center gap-1.5">
+                        See All <FiArrowRight size={14} aria-hidden="true" />
                     </Link>
                 )}
             </div>

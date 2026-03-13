@@ -1,26 +1,29 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { HiThumbUp } from 'react-icons/hi2';
+import { FiBookmark, FiGrid } from 'react-icons/fi';
+import { BiTrendingUp } from 'react-icons/bi';
 
 const features = [
     {
-        icon: '🎯',
-        title: 'The GameMeter™',
-        body: 'Vote with verdicts. Must Play, Good Enough, Skip It, Masterpiece. The community decides — not critics.'
+        icon: HiThumbUp,
+        title: 'GAMEMETER',
+        body: 'Vote with verdicts. Must Play, Good Enough, Skip It, or Masterpiece. The community decides — not critics.'
     },
     {
-        icon: '📚',
-        title: 'Your Game Shelf',
-        body: "Track every game you've played, abandoned, or are afraid to finish. No judgment. (Okay, a little judgment.)"
+        icon: FiBookmark,
+        title: 'Game Shelf',
+        body: "Track every game you've played, abandoned, or plan to start. Organize your library your way."
     },
     {
-        icon: '🔥',
-        title: 'Hot Debates',
-        body: 'Argue about whether Cyberpunk redeemed itself. Whether Elden Ring is overrated. It\'s basically therapy.'
+        icon: BiTrendingUp,
+        title: 'Community Debates',
+        body: 'Discuss the biggest topics in gaming. Weigh in on controversial takes and see how your opinion compares.'
     },
     {
-        icon: '🎲',
+        icon: FiGrid,
         title: 'Mood Discovery',
-        body: "Don't know what to play? Pick your vibe. We'll find your next obsession from 500,000+ games."
+        body: "Find your next game based on your current vibe. Discover hidden gems from 500,000+ games."
     }
 ];
 
@@ -45,7 +48,7 @@ export const FeaturesSection = () => {
                 {/* Header */}
                 <div className="flex flex-col items-center text-center mb-[48px]">
                     <h2 className="font-syne text-[48px] font-[900] text-white leading-none mb-4">
-                        Built for Real Gamers
+                        Platform Features
                     </h2>
                     <p className="text-text-muted text-[16px]">
                         Not another review aggregator. A community that actually plays.
@@ -64,10 +67,10 @@ export const FeaturesSection = () => {
                         <motion.div
                             key={i}
                             variants={itemVariants}
-                            className="bg-[#111] border border-[#1e1e1e] border-t-2 border-t-transparent hover:border-[#333] hover:border-t-accent rounded-[12px] p-[32px_24px] transition-colors duration-300 group"
+                            className="bg-[#111] border border-[#1e1e1e] border-t-2 border-t-transparent hover:border-[#333] hover:border-t-accent rounded-[12px] p-[32px_24px] transition-all duration-300 group"
                         >
-                            <div className="text-[36px] mb-4 group-hover:scale-110 transition-transform origin-left">
-                                {feature.icon}
+                            <div className="mb-4 group-hover:scale-110 transition-transform origin-left text-accent">
+                                <feature.icon size={32} aria-hidden="true" />
                             </div>
                             <h3 className="font-syne text-[18px] font-[700] text-white mb-2">
                                 {feature.title}

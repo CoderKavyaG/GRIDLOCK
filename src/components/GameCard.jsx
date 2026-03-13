@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { IoGameControllerOutline } from 'react-icons/io5';
+import { FiArrowRight } from 'react-icons/fi';
 
 const GameCard = ({ game, rank }) => {
     if (!game) return null;
@@ -48,7 +49,7 @@ const GameCard = ({ game, rank }) => {
 
                 {/* Hover overlay */}
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-[2] flex items-end p-3">
-                    <span className="text-[11px] font-bold text-white/90 uppercase tracking-wider">View Game →</span>
+                    <span className="text-[11px] font-bold text-white/90 uppercase tracking-wider flex items-center gap-2">View Game <FiArrowRight size={14} aria-hidden="true" /></span>
                 </div>
             </div>
 

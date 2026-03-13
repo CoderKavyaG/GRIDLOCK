@@ -1,14 +1,15 @@
 import { useState } from "react";
-import { FaTimes } from "react-icons/fa";
+import { FiX, FiArrowRight } from "react-icons/fi";
+import { HiThumbUp, HiMinus, HiThumbDown, HiSparkles } from "react-icons/hi2";
 import { collection, addDoc, doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import { useAuth } from "../context/AuthContext";
 
 const VERDICTS = [
-  { id: "mustPlay", label: "Must Play", color: "#2ed573", icon: "🟢" },
-  { id: "goodEnough", label: "Good Enough", color: "#ffa502", icon: "🟡" },
-  { id: "skipIt", label: "Skip It", color: "#ff4757", icon: "🔴" },
-  { id: "masterpiece", label: "Masterpiece", color: "#a855f7", icon: "👑" },
+  { id: "mustPlay", label: "Must Play", color: "#2ed573", icon: HiThumbUp },
+  { id: "goodEnough", label: "Good Enough", color: "#ffa502", icon: HiMinus },
+  { id: "skipIt", label: "Skip It", color: "#ff4757", icon: HiThumbDown },
+  { id: "masterpiece", label: "Masterpiece", color: "#a855f7", icon: HiSparkles },
 ];
 
 export default function WriteReviewModal({ game, onClose, onSuccess }) {
@@ -82,7 +83,7 @@ export default function WriteReviewModal({ game, onClose, onSuccess }) {
           onClick={onClose}
           className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-white transition-colors"
         >
-          <FaTimes size={20} />
+          <FiX size={20} aria-hidden="true" />
         </button>
 
         <div className="flex items-center gap-4 mb-6">
@@ -114,7 +115,7 @@ export default function WriteReviewModal({ game, onClose, onSuccess }) {
                     backgroundColor: selectedVerdict === v.id ? v.color : 'transparent',
                   }}
                 >
-                  <span className="text-lg">{v.icon}</span>
+                  <v.icon size={18} aria-hidden="true" />
                   {v.label}
                 </button>
               ))}
@@ -127,7 +128,7 @@ export default function WriteReviewModal({ game, onClose, onSuccess }) {
             <textarea
               value={reviewText}
               onChange={(e) => setReviewText(e.target.value)}
-              placeholder="What did you think? No spoilers please..."
+              placeholder="Share your experience with this game... (Professional and helpful reviews only)"
               className="bg-[#111] border border-[#2a2a2a] rounded-lg min-h-[120px] p-[14px] text-[15px] focus:outline-none focus:border-[var(--accent)] transition-all resize-y"
               maxLength={500}
             />
@@ -158,7 +159,7 @@ export default function WriteReviewModal({ game, onClose, onSuccess }) {
                Submitting...
              </>
           ) : (
-            "Submit Review →"
+            <>Submit Review <FiArrowRight size={16} aria-hidden="true" /></>
           )}
           </button>
 

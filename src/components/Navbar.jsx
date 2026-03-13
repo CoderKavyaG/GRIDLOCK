@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiSearch, FiMenu, FiX, FiUser, FiLogOut, FiSettings } from 'react-icons/fi';
+import { HiSparkles } from 'react-icons/hi2';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import NotificationDropdown from './NotificationDropdown';
+import { useSearch } from '../context/SearchContext';
 
 export const Navbar = () => {
     const [scrolled, setScrolled] = useState(false);
-    const [searchOpen, setSearchOpen] = useState(false);
-    const [searchQuery, setSearchQuery] = useState("");
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    
+    const { toggleSearch } = useSearch();
     
     const location = useLocation();
     const navigate = useNavigate();
@@ -32,16 +35,10 @@ export const Navbar = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    useEffect(() => {
-        const handleKeyDown = (e) => {
-            if (e.key === 'Escape') setSearchOpen(false);
-        };
-        if (searchOpen) window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [searchOpen]);
+
 
     useEffect(() => {
-        if (searchOpen || mobileMenuOpen) {
+        if (mobileMenuOpen) {
             document.body.style.overflow = 'hidden';
         } else {
             document.body.style.overflow = 'auto';
@@ -49,16 +46,9 @@ export const Navbar = () => {
         return () => {
             document.body.style.overflow = 'auto';
         };
-    }, [searchOpen, mobileMenuOpen]);
+    }, [mobileMenuOpen]);
 
-    const handleSearchSubmit = (e) => {
-        e.preventDefault();
-        if (searchQuery.trim()) {
-            setSearchOpen(false);
-            navigate(`/explore?search=${encodeURIComponent(searchQuery)}`);
-            setSearchQuery("");
-        }
-    };
+
 
     const handleLogout = async () => {
         setDropdownOpen(false);
@@ -98,7 +88,7 @@ export const Navbar = () => {
 
                     {/* End */}
                     <div className="flex items-center justify-end gap-5 w-[150px] relative z-10">
-                        <button onClick={() => setSearchOpen(true)} className="text-[var(--text-muted)] hover:text-white transition-colors" aria-label="Search">
+                        <button onClick={toggleSearch} className="text-[var(--text-muted)] hover:text-white transition-colors" aria-label="Search">
                             <FiSearch size={20} />
                         </button>
 
@@ -110,7 +100,9 @@ export const Navbar = () => {
                                     <Link to="/signup" className="text-[13px] font-inter font-[700] bg-[var(--accent)] text-black rounded-[6px] px-[16px] py-[8px] hover:brightness-110 transition-all whitespace-nowrap">Join Free</Link>
                                 </>
                             ) : (
-                                <div className="relative">
+                                <div className="flex items-center gap-5">
+                                    <NotificationDropdown />
+                                    <div className="relative">
                                     <button onClick={() => setDropdownOpen(!dropdownOpen)} className="w-8 h-8 rounded-full bg-[#222] border border-[#333] hover:border-[var(--accent)] overflow-hidden transition-all flex items-center justify-center">
                                          {userProfile?.avatar ? <img src={userProfile.avatar} alt="Profile" className="w-full h-full object-cover"/> : <span className="text-[14px] font-bold">{userProfile?.username?.charAt(0).toUpperCase() || "U"}</span>}
                                     </button>
@@ -128,12 +120,14 @@ export const Navbar = () => {
                                                      <div className="text-white truncate">@{userProfile?.username}</div>
                                                  </div>
                                                  <Link to="/profile" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2 text-[var(--text-muted)] hover:text-white hover:bg-[#222] transition-colors"><FiUser /> Profile</Link>
+                                                 <Link to="/rewind" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2 text-[var(--accent)] hover:bg-[var(--accent)]/10 transition-colors"><HiSparkles size={14} aria-hidden="true" /> Rewind 2025</Link>
                                                  <Link to="/settings" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2 text-[var(--text-muted)] hover:text-white hover:bg-[#222] transition-colors"><FiSettings /> Settings</Link>
                                                  <button onClick={handleLogout} className="flex items-center justify-start gap-3 px-4 py-2 text-[#ff4757] hover:bg-[#ff4757]/10 w-full text-left transition-colors"><FiLogOut /> Sign Out</button>
                                             </motion.div>
                                         )}
                                     </AnimatePresence>
                                 </div>
+                            </div>
                             )}
                         </div>
 
@@ -144,23 +138,7 @@ export const Navbar = () => {
                 </div>
             </header>
 
-            {/* Search Overlay */}
-            <AnimatePresence>
-                {searchOpen && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="fixed inset-0 z-[110] bg-black/95 flex flex-col justify-center items-center px-6">
-                        <button className="absolute top-8 right-8 text-[var(--text-muted)] hover:text-white transition-colors" onClick={() => setSearchOpen(false)}>
-                            <FiX size={32} />
-                        </button>
-                        <form onSubmit={handleSearchSubmit} className="w-full max-w-3xl relative">
-                            <FiSearch className="absolute left-6 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={28} />
-                            <input type="text" autoFocus placeholder="Search games..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full bg-transparent border-b-2 border-[#222] text-white text-[24px] lg:text-[32px] font-syne font-bold pb-4 pl-16 pr-4 focus:outline-none focus:border-[var(--accent)] placeholder:text-[#444] transition-colors" />
-                            <p className="text-[var(--text-muted)] text-[12px] font-inter mt-8 text-center bg-[#111] py-2 px-4 rounded-full max-w-max mx-auto border border-[#222]">
-                                Press <kbd className="font-sans text-white font-bold ml-1">Enter</kbd> to search or <kbd className="font-sans text-white font-bold ml-1">ESC</kbd> to close
-                            </p>
-                        </form>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+
 
             {/* Mobile Menu */}
             <AnimatePresence>
@@ -188,6 +166,7 @@ export const Navbar = () => {
                             ) : (
                                 <>
                                     <Link to="/profile" onClick={() => setMobileMenuOpen(false)} className="w-full flex items-center justify-center py-3 text-[14px] font-[600] text-white border border-[#333] rounded-[8px] hover:bg-[#222]">My Profile</Link>
+                                    <Link to="/rewind" onClick={() => setMobileMenuOpen(false)} className="w-full flex items-center justify-center py-3 text-[14px] font-[700] text-[var(--accent)] border border-[var(--accent)]/30 bg-[var(--accent)]/5 rounded-[8px] gap-2"><HiSparkles size={14} aria-hidden="true" /> Rewind 2025</Link>
                                     <Link to="/settings" onClick={() => setMobileMenuOpen(false)} className="w-full flex items-center justify-center py-3 text-[14px] font-[600] text-[var(--text-muted)] border border-transparent hover:text-white">Settings</Link>
                                     <button onClick={() => { setMobileMenuOpen(false); handleLogout(); }} className="mt-2 text-[#ff4757] font-bold text-[14px]">Sign Out</button>
                                 </>
