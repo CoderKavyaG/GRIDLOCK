@@ -25,10 +25,10 @@ export default function NotFound() {
             Back to Discover
           </Link>
           <Link
-            to="/explore"
+            to="/leaderboard"
             className="h-12 px-8 bg-[#161616] border border-[#2a2a2a] text-white font-syne font-bold rounded-lg hover:border-[#555] transition-all flex items-center justify-center"
           >
-            Explore Games
+            Leaderboard
           </Link>
         </div>
       </div>

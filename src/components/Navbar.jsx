@@ -21,7 +21,6 @@ export const Navbar = () => {
     const navLinks = [
         { name: 'Discover', path: '/' },
         { name: 'Leaderboard', path: '/leaderboard' },
-        { name: 'Explore', path: '/explore' },
         { name: 'Debates', path: '/debates' }
     ];
 

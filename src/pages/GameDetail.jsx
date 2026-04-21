@@ -195,373 +195,395 @@ export default function GameDetail() {
         url={`/game/${gameId}`}
       />
       
-      {/* HERO SECTION */}
-      <div className="relative w-full h-[480px] bg-[#111]">
-        <img 
-          src={game.background_image} 
-          alt={game.name}
-          className="w-full h-full object-cover opacity-60"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] to-transparent w-full"></div>
-        
-        {/* Hero Content */}
-        <div className="absolute bottom-[-60px] md:bottom-[-40px] left-0 right-0 z-10">
-          <div className="max-w-[1400px] mx-auto px-4 md:px-8 flex flex-col md:flex-row items-end gap-6 md:gap-10">
-            {/* Poster */}
-            <div className="w-[120px] md:w-[180px] aspect-[3/4] flex-shrink-0 bg-[#222] rounded-xl overflow-hidden border-4 border-[#161616] shadow-2xl relative">
-               <img src={game.background_image_additional || game.background_image} alt="Cover" className="w-full h-full object-cover" />
-            </div>
-
-            {/* Info */}
-            <div className="flex-1 pb-2 w-full">
-              <div className="flex items-center gap-2 mb-3">
-                 {game.parent_platforms?.slice(0, 4).map((p) => (
-                    <span key={p.platform.id} className="text-[11px] font-bold uppercase tracking-wider bg-white/10 text-white/90 px-2 py-0.5 rounded backdrop-blur-md">
-                      {p.platform.name}
-                    </span>
-                 ))}
-                 {game.parent_platforms?.length > 4 && <span className="text-[11px] font-bold text-white/70">+{game.parent_platforms.length - 4} MORE</span>}
+      {/* TRAILER SECTION - ON TOP */}
+      {trailer && trailer.data && trailer.data.max ? (
+        <div className="w-full aspect-video bg-black relative group">
+          <video 
+            src={trailer.data.max} 
+            controls
+            poster={trailer.preview || game.background_image}
+            className="w-full h-full object-cover"
+            autoPlay
+            muted
+          ></video>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent pointer-events-none"></div>
+        </div>
+      ) : (
+        <div className="w-full aspect-video bg-[#111] relative overflow-hidden">
+          <img 
+            src={game.background_image} 
+            alt={game.name}
+            className="w-full h-full object-cover opacity-40"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/40 to-transparent"></div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center">
+              <div className="w-16 h-16 rounded-full border-2 border-white/30 flex items-center justify-center mx-auto mb-4">
+                <FiArrowRight size={24} className="text-white/50 ml-1" />
               </div>
-              <h1 className="font-syne text-[36px] md:text-[56px] font-black leading-tight tracking-tight mb-4 drop-shadow-xl">{game.name}</h1>
-              
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[14px] text-white/80 font-medium pb-[40px] md:pb-0">
-                {game.metacritic && (
-                  <span className={`px-3 py-1 rounded-md font-bold text-[16px] flex items-center gap-2 ${getMetacriticColor(game.metacritic)}`}>
-                    {game.metacritic} <span className="text-[11px] font-normal uppercase tracking-wider opacity-80 mt-0.5">Metacritic</span>
-                  </span>
-                )}
-                <span className="flex items-center gap-1.5"><FiCalendar className="opacity-50"/> {new Date(game.released).getFullYear()}</span>
-                {game.developers?.[0] && <span className="flex items-center gap-1.5"><FiBriefcase className="opacity-50"/> {game.developers[0].name}</span>}
-                {game.playtime > 0 && <span className="flex items-center gap-1.5"><FiClock className="opacity-50"/> {game.playtime} hrs avg</span>}
-              </div>
+              <p className="text-white/60 text-sm">No trailer available</p>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* ACTION BAR */}
-      <div className="bg-[#111] border-b border-[#1e1e1e] sticky top-[64px] z-[90] py-4 mt-16 md:mt-10 backdrop-blur-md bg-opacity-90 transition-all">
-        <div className="max-w-[1400px] mx-auto px-4 md:px-8 flex flex-wrap items-center gap-4">
-          
-          <div className="group transition-transform hover:scale-105 active:scale-95 duration-200">
-            <AddToShelfButton 
-               game={{ id: game.id, name: game.name, cover: game.background_image }} 
-               currentStatus={userShelfStatus} 
-               onStatusChange={setUserShelfStatus} 
-            />
+      {/* GAME INFO SECTION - BELOW TRAILER */}
+      <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-8 md:py-12">
+        <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-8 md:gap-12 mb-8">
+          {/* POSTER */}
+          <div className="w-full md:w-[200px] mx-auto md:mx-0">
+            <div className="aspect-[3/4] bg-[#222] rounded-xl overflow-hidden border-2 border-[#333] shadow-2xl">
+              <img src={game.background_image_additional || game.background_image} alt="Cover" className="w-full h-full object-cover" />
+            </div>
           </div>
 
-          {userVerdict ? (
-            <button 
-              onClick={() => setShowVerdictModal(true)}
-              className="h-11 px-6 font-syne font-black rounded-lg border-2 border-[var(--accent)] flex items-center gap-2 transition-all hover:bg-[var(--accent)] hover:text-black group shadow-[0_0_20px_rgba(232,255,71,0.1)] hover:shadow-[0_0_30px_rgba(232,255,71,0.2)]"
-            >
-               Your Verdict: <span>{getVerdictMetadata(userVerdict).label}</span>
-            </button>
-          ) : (
-            <button 
-              onClick={() => user ? setShowVerdictModal(true) : addToast("Sign in to cast verdict", "error")}
-              className="h-11 px-8 bg-white text-black hover:bg-[var(--accent)] hover:scale-105 active:scale-95 text-black font-syne font-black rounded-lg transition-all text-[13px] uppercase tracking-wider"
-            >
-              Cast Your Verdict
-            </button>
-          )}
-
-          <button 
-             onClick={() => user ? setShowReviewModal(true) : addToast("Sign in to write review", "error")}
-             className="h-11 px-5 text-[var(--text-muted)] hover:text-white font-bold text-[14px] transition-colors border-2 border-transparent hover:border-[#333] rounded-lg"
-          >
-            Review
-          </button>
-          
-          <div className="flex-1"></div>
-
-          <button className="w-11 h-11 rounded-lg bg-[#161616] border border-[#2a2a2a] flex items-center justify-center text-[var(--text-muted)] hover:text-white hover:border-[#444] transition-all hover:bg-[#222]">
-            <FiBookmark size={18} aria-hidden="true" />
-          </button>
-          <button onClick={handleShare} className="w-11 h-11 rounded-lg bg-[#161616] border border-[#2a2a2a] flex items-center justify-center text-[var(--text-muted)] hover:text-white hover:border-[#444] transition-all hover:bg-[#222]">
-            <FiShare2 size={18} aria-hidden="true" />
-          </button>
-        </div>
-      </div>
-
-      <div className="max-w-[1400px] mx-auto px-4 md:px-8 mt-12 grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-12">
-        
-        {/* MAIN REVIEWS & DETAILS */}
-        <div className="space-y-16">
+          {/* GAME DETAILS */}
+          <div className="flex flex-col justify-start">
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              {game.parent_platforms?.slice(0, 4).map((p) => (
+                <span key={p.platform.id} className="text-[11px] font-bold uppercase tracking-wider bg-white/10 text-white/90 px-3 py-1 rounded-lg backdrop-blur-md border border-white/10">
+                  {p.platform.name}
+                </span>
+              ))}
+            </div>
             
-          {/* GAMEMETER SECTION */}
-          <section className="bg-[#0f0f0f] border border-[#1e1e1e] rounded-[16px] p-6 md:p-10 relative overflow-hidden">
-             <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--accent)] filter blur-[100px] opacity-[0.03] pointer-events-none"></div>
-             
-             <div className="mb-8">
-                 <span className="inline-block bg-[#1a1a1a] text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-bold px-3 py-1.5 rounded-full mb-4 border border-[#2a2a2a]">
-                     Community GameMeter™
-                 </span>
-                 <div className="flex flex-col md:flex-row md:items-end gap-2 md:gap-4">
-                     <h2 className="font-syne text-[40px] font-black leading-none">
-                        {dominantVerdict ? (
-                            <span style={{color: getVerdictMetadata(dominantVerdict).color}}>
-                                {getVerdictMetadata(dominantVerdict).label}
-                            </span>
-                        ) : "NO VERDICTS YET"}
-                     </h2>
-                 </div>
-                 <p className="text-[14px] text-[var(--text-muted)] mt-2">
-                     Based on {verdictStats.total} player reviews
-                 </p>
-             </div>
+            <h1 className="font-syne text-[42px] md:text-[56px] font-black leading-tight tracking-tight mb-6">{game.name}</h1>
+            
+            <div className="flex flex-wrap items-center gap-x-8 gap-y-3 mb-8">
+              {game.metacritic && (
+                <div className={`px-4 py-2 rounded-lg font-bold text-[18px] flex items-center gap-2 ${getMetacriticColor(game.metacritic)}`}>
+                  {game.metacritic} 
+                  <span className="text-[11px] font-normal uppercase tracking-wider opacity-80">Metacritic</span>
+                </div>
+              )}
+              {game.released && (
+                <span className="flex items-center gap-2 text-[15px] text-white/80">
+                  <FiCalendar className="opacity-60"/> 
+                  {new Date(game.released).getFullYear()}
+                </span>
+              )}
+              {game.developers?.[0] && (
+                <span className="flex items-center gap-2 text-[15px] text-white/80">
+                  <FiBriefcase className="opacity-60"/> 
+                  {game.developers[0].name}
+                </span>
+              )}
+            </div>
 
-             <div className="space-y-4">
-                 {[
-                   { id: 'mustPlay', label: "Must Play", color: "#2ed573", icon: HiHandThumbUp },
-                   { id: 'goodEnough', label: "Good Enough", color: "#ffa502", icon: HiMinus },
-                   { id: 'skipIt', label: "Skip It", color: "#ff4757", icon: HiHandThumbDown },
-                   { id: 'masterpiece', label: "Masterpiece", color: "#a855f7", icon: HiSparkles },
-                 ].map(v => {
-                     const count = verdictStats[v.id] || 0;
-                     const percent = verdictStats.total > 0 ? Math.round((count / verdictStats.total) * 100) : 0;
-                     return (
-                         <div key={v.id} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 relative group">
-                             <div className="w-[120px] text-[13px] font-medium text-[var(--text-muted)] group-hover:text-white transition-colors flex items-center gap-2">
-                                 <v.icon size={14} aria-hidden="true" />
-                                 <span className="flex-1">{v.label}</span>
-                                 <span>{percent}%</span>
-                             </div>
-                             <div className="flex-1 h-3 bg-[#1a1a1a] rounded-full overflow-hidden border border-[#222]">
-                                 <div 
-                                     className="h-full rounded-full transition-all duration-1000 ease-out"
-                                     style={{ width: `${percent}%`, backgroundColor: v.color }}
-                                 ></div>
-                             </div>
-                         </div>
-                     );
-                 })}
-             </div>
+            {/* ACTION BUTTONS */}
+            <div className="flex flex-wrap gap-4 mb-8">
+              <div className="group transition-transform hover:scale-105 active:scale-95 duration-200">
+                <AddToShelfButton 
+                  game={{ id: game.id, name: game.name, cover: game.background_image }} 
+                  currentStatus={userShelfStatus} 
+                  onStatusChange={setUserShelfStatus} 
+                />
+              </div>
+
+              {userVerdict ? (
+                <button 
+                  onClick={() => setShowVerdictModal(true)}
+                  className="h-12 px-8 font-syne font-black rounded-lg border-2 border-[var(--accent)] flex items-center gap-2 transition-all hover:bg-[var(--accent)] hover:text-black shadow-[0_0_20px_rgba(232,255,71,0.1)] hover:shadow-[0_0_30px_rgba(232,255,71,0.2)]"
+                >
+                  Your Verdict: <span>{getVerdictMetadata(userVerdict).label}</span>
+                </button>
+              ) : (
+                <button 
+                  onClick={() => user ? setShowVerdictModal(true) : addToast("Sign in to cast verdict", "error")}
+                  className="h-12 px-8 bg-white text-black hover:bg-[var(--accent)] hover:scale-105 active:scale-95 font-syne font-black rounded-lg transition-all text-[13px] uppercase tracking-wider"
+                >
+                  Cast Your Verdict
+                </button>
+              )}
+
+              <button 
+                onClick={() => user ? setShowReviewModal(true) : addToast("Sign in to write review", "error")}
+                className="h-12 px-8 bg-[#161616] text-white hover:bg-[#222] border border-[#2a2a2a] font-bold text-[14px] transition-colors rounded-lg"
+              >
+                Write Review
+              </button>
+
+              <button onClick={handleShare} className="h-12 w-12 rounded-lg bg-[#161616] border border-[#2a2a2a] flex items-center justify-center text-[var(--text-muted)] hover:text-white hover:border-[#444] transition-all hover:bg-[#222]">
+                <FiShare2 size={18} aria-hidden="true" />
+              </button>
+            </div>
+
+            {/* DESCRIPTION */}
+            {game.description_raw && (
+              <p className="text-[15px] text-white/80 leading-relaxed line-clamp-4">
+                {game.description_raw}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* GENRES */}
+        {game.genres && game.genres.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-12">
+            {game.genres.map(g => (
+              <span key={g.id} className="bg-[#161616] text-[12px] px-4 py-2 rounded-lg border border-[#2a2a2a] text-white/90 hover:border-[var(--accent)] transition-all">
+                {g.name}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* MAIN CONTENT */}
+      <div className="max-w-[1400px] mx-auto px-4 md:px-8 grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-12">
+        
+        {/* LEFT COLUMN - REVIEWS & DETAILS */}
+        <div className="space-y-12">
+
+          {/* GAMEMETER SECTION - ENHANCED */}
+          <section className="bg-[#0f0f0f] border border-[#1e1e1e] rounded-[16px] p-8 md:p-12 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--accent)] filter blur-[100px] opacity-[0.05] pointer-events-none"></div>
+            
+            <div className="mb-10">
+              <span className="inline-block bg-[#1a1a1a] text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-bold px-4 py-2 rounded-full mb-6 border border-[#2a2a2a]">
+                Community Verdict
+              </span>
+              
+              <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 md:gap-0 mb-4">
+                <div>
+                  <h2 className="font-syne text-[48px] md:text-[64px] font-black leading-none mb-2">
+                    {verdictStats.total > 0 ? Math.round((Math.max(verdictStats.mustPlay, verdictStats.goodEnough, verdictStats.skipIt, verdictStats.masterpiece) / verdictStats.total) * 100) : 0}%
+                  </h2>
+                  <h3 className="font-syne text-[24px] font-black leading-none">
+                    {dominantVerdict ? (
+                      <span style={{color: getVerdictMetadata(dominantVerdict).color}}>
+                        {getVerdictMetadata(dominantVerdict).label}
+                      </span>
+                    ) : "NOT ENOUGH VOTES"}
+                  </h3>
+                </div>
+                <p className="text-[14px] text-[var(--text-muted)]">
+                  Based on <span className="font-bold text-white">{verdictStats.total.toLocaleString()}</span> player votes
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              {[
+                { id: 'masterpiece', label: "Perfection", color: "#a855f7", icon: HiSparkles },
+                { id: 'mustPlay', label: "Go for it", color: "#2ed573", icon: HiHandThumbUp },
+                { id: 'goodEnough', label: "Timepass", color: "#ffa502", icon: HiMinus },
+                { id: 'skipIt', label: "Skip", color: "#ff4757", icon: HiHandThumbDown },
+              ].map(v => {
+                const count = verdictStats[v.id] || 0;
+                const percent = verdictStats.total > 0 ? Math.round((count / verdictStats.total) * 100) : 0;
+                return (
+                  <div key={v.id} className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 w-[140px] text-[14px] font-medium flex-shrink-0">
+                      <v.icon size={18} aria-hidden="true" style={{color: v.color}} />
+                      <span className="text-white">{v.label}</span>
+                    </div>
+                    <div className="flex-1">
+                      <div className="h-2 bg-[#1a1a1a] rounded-full overflow-hidden border border-[#2a2a2a]">
+                        <div 
+                          className="h-full rounded-full transition-all duration-1000 ease-out"
+                          style={{ width: `${percent}%`, backgroundColor: v.color }}
+                        ></div>
+                      </div>
+                    </div>
+                    <div className="text-right w-[50px] text-[13px] font-bold text-white">
+                      {percent}%
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </section>
 
-          {/* SCREENSHOTS */}
+          {/* TRAILER ALTERNATIVE (if screenshots show) */}
           {screenshots.length > 0 && (
-              <section>
-                  <div className="flex items-center gap-4 mb-6">
-                      <h3 className="font-syne text-[24px] font-bold">Screenshots</h3>
-                      <div className="h-px bg-[#222] flex-1 mt-2"></div>
+            <section>
+              <div className="flex items-center gap-4 mb-8">
+                <h3 className="font-syne text-[28px] font-bold">Gallery</h3>
+                <div className="h-px bg-[#222] flex-1"></div>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {screenshots.slice(0, 6).map((img, idx) => (
+                  <div 
+                    key={img.id} 
+                    onClick={() => { setLightboxIndex(idx); setLightboxOpen(true); }}
+                    className="aspect-video rounded-lg overflow-hidden cursor-pointer group relative"
+                  >
+                    <img src={img.image} alt="Screenshot" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors"></div>
                   </div>
-                  <div className="flex gap-4 overflow-x-auto pb-6 snap-x no-scrollbar">
-                      {screenshots.map((img, idx) => (
-                          <div 
-                              key={img.id} 
-                              onClick={() => { setLightboxIndex(idx); setLightboxOpen(true); }}
-                              className="w-[280px] md:w-[320px] h-[160px] md:h-[180px] shrink-0 rounded-xl overflow-hidden cursor-pointer group snap-center relative"
-                          >
-                              <img src={img.image} alt="Screenshot" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors"></div>
-                          </div>
-                      ))}
-                  </div>
-              </section>
-          )}
-
-          {/* TRAILER */}
-          {trailer && trailer.data && trailer.data.max && (
-              <section>
-                   <div className="flex items-center gap-4 mb-6">
-                      <h3 className="font-syne text-[24px] font-bold">Trailer</h3>
-                      <div className="h-px bg-[#222] flex-1 mt-2"></div>
-                  </div>
-                  <div className="w-full aspect-video rounded-xl overflow-hidden border border-[#222] bg-black">
-                      <video 
-                          src={trailer.data.max} 
-                          controls
-                          poster={trailer.preview}
-                          className="w-full h-full object-cover"
-                      ></video>
-                  </div>
-              </section>
+                ))}
+              </div>
+            </section>
           )}
 
           {/* COMMUNITY REVIEWS */}
           <section id="reviews">
-              <div className="flex items-center gap-4 mb-8">
-                  <h3 className="font-syne text-[24px] font-bold">Player Reviews</h3>
-                  {reviews.length > 0 && <span className="bg-[#222] text-[var(--text-muted)] text-[12px] px-3 py-1 rounded-full font-bold">{reviews.length}</span>}
-                  <div className="h-px bg-[#222] flex-1 mt-2"></div>
+            <div className="flex items-center gap-4 mb-8">
+              <h3 className="font-syne text-[28px] font-bold">Player Reviews</h3>
+              {reviews.length > 0 && <span className="bg-[#222] text-[var(--text-muted)] text-[12px] px-4 py-2 rounded-full font-bold">{reviews.length}</span>}
+              <div className="h-px bg-[#222] flex-1"></div>
+            </div>
+
+            {reviewsLoading ? (
+              <div className="space-y-4 animate-pulse">
+                {[1,2,3].map(i => <div key={i} className="h-40 bg-[#161616] rounded-xl border border-[#222]"></div>)}
               </div>
+            ) : reviews.length > 0 ? (
+              <div className="space-y-5">
+                {reviews.map(review => (
+                  <div key={review.id} className="bg-[#161616] border border-[#222] rounded-[14px] p-6 transition-all hover:border-[#333] hover:bg-[#1a1a1a]">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3 flex-1">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-[var(--accent)] to-[#a855f7] flex items-center justify-center font-bold text-black border-2 border-black object-cover overflow-hidden flex-shrink-0">
+                          {review.avatar ? <img src={review.avatar} alt="Avatar" className="w-full h-full object-cover"/> : review.displayName?.charAt(0)}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="font-bold text-[15px] text-white truncate">{review.displayName}</div>
+                          <div className="text-[var(--text-muted)] text-[12px]">@{review.username} • {review.createdAt ? new Date(review.createdAt).toLocaleDateString() : 'Recently'}</div>
+                        </div>
+                      </div>
+                      
+                      <div className={`px-4 py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider border flex-shrink-0 ml-4`}
+                        style={{ 
+                          borderColor: `${getVerdictMetadata(review.verdict).color}40`,
+                          backgroundColor: `${getVerdictMetadata(review.verdict).color}15`,
+                          color: getVerdictMetadata(review.verdict).color
+                        }}>
+                        {getVerdictMetadata(review.verdict).label}
+                      </div>
+                    </div>
 
-              {reviewsLoading ? (
-                  <div className="space-y-4 animate-pulse">
-                      {[1,2,3].map(i => <div key={i} className="h-32 bg-[#161616] rounded-xl border border-[#222]"></div>)}
+                    {review.reviewText && (
+                      <p className="text-[15px] text-[#ddd] leading-[1.6] mb-4">
+                        {review.reviewText.length > 300 ? `${review.reviewText.substring(0, 300)}...` : review.reviewText}
+                      </p>
+                    )}
+
+                    <div className="pt-4 border-t border-[#222] flex items-center gap-6">
+                      <button className="flex items-center gap-2 text-[12px] text-[var(--text-muted)] hover:text-[#2ed573] transition-colors font-medium">
+                        <HiHandThumbUp size={14} aria-hidden="true" /> Helpful ({(review.likes || []).length})
+                      </button>
+                      <button className="text-[12px] text-[#666] hover:text-[#ff4757] transition-colors ml-auto">
+                        Report
+                      </button>
+                    </div>
                   </div>
-              ) : reviews.length > 0 ? (
-                  <div className="space-y-4">
-                      {reviews.map(review => (
-                          <div key={review.id} className="bg-[#161616] border border-[#222] rounded-[12px] p-5 sm:p-6 transition-all hover:border-[#333]">
-                               <div className="flex items-center justify-between mb-4">
-                                   <div className="flex items-center gap-3">
-                                       <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[var(--accent)] to-[#a855f7] flex items-center justify-center font-bold text-black border-2 border-black object-cover overflow-hidden">
-                                          {review.avatar ? <img src={review.avatar} alt="Avatar"/> : review.displayName?.charAt(0)}
-                                       </div>
-                                       <div>
-                                           <div className="font-bold text-[15px] {review.displayName} leading-tight text-white">{review.displayName}</div>
-                                           <div className="text-[var(--text-muted)] text-[12px]">@{review.username} • {new Date(review.createdAt).toLocaleDateString()}</div>
-                                       </div>
-                                   </div>
-                                   
-                                   <div className={`px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider border`}
-                                        style={{ 
-                                            borderColor: `${getVerdictMetadata(review.verdict).color}40`,
-                                            backgroundColor: `${getVerdictMetadata(review.verdict).color}15`,
-                                            color: getVerdictMetadata(review.verdict).color
-                                        }}>
-                                       {getVerdictMetadata(review.verdict).label}
-                                   </div>
-                               </div>
-
-                               {review.spoiler ? (
-                                   <div className="bg-[#111] border border-[#2a2a2a] p-4 text-center rounded-lg cursor-pointer group hover:bg-[#161616] transition-colors"
-                                        onClick={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextSibling.style.display = 'block'; }}
-                                   >
-                                       <FaFlag className="text-[#ff4757] opacity-60 mx-auto mb-2" size={16} />
-                                       <p className="text-[13px] text-[var(--text-muted)] group-hover:text-white transition-colors">⚠️ Spoiler Review — Click to reveal</p>
-                                   </div>
-                               ) : null}
-
-                               <p className="text-[15px] text-[#ddd] leading-[1.6]" style={{ display: review.spoiler ? 'none' : 'block' }}>
-                                   {review.reviewText || <span className="italic opacity-50">No written review.</span>}
-                               </p>
-
-                               <div className="mt-5 pt-4 border-t border-[#222] flex items-center gap-6">
-                                    <button className="flex items-center gap-2 text-[12px] text-[var(--text-muted)] hover:text-[#2ed573] transition-colors font-medium">
-                                        <HiHandThumbUp size={14} aria-hidden="true" /> Helpful ({(review.likes || []).length})
-                                    </button>
-                                    <button className="text-[12px] text-[#666] hover:text-[#ff4757] transition-colors ml-auto">
-                                        Report
-                                    </button>
-                               </div>
-                          </div>
-                      ))}
-                  </div>
-              ) : (
-                   <EmptyState 
-                       icon={<BiJoystick size={48} />} 
-                       title="No reviews yet" 
-                       subtitle="Be the first player to share your thoughts on this game."
-                       ctaText={<>Write a Review <FiArrowRight size={16} aria-hidden="true" /></>} 
-                       onCtaClick={() => user ? setShowReviewModal(true) : alert("Sign in to review")}
-                   />
-              )}
+                ))}
+              </div>
+            ) : (
+              <EmptyState 
+                icon={<BiJoystick size={48} />} 
+                title="No reviews yet" 
+                subtitle="Be the first player to share your thoughts on this game."
+                ctaText={<>Write a Review <FiArrowRight size={16} aria-hidden="true" /></>} 
+                onCtaClick={() => user ? setShowReviewModal(true) : addToast("Sign in to review", "error")}
+              />
+            )}
           </section>
 
         </div>
 
-        {/* SIDEBAR */}
-        <div className="space-y-10 lg:pl-4 border-l-0 lg:border-l lg:border-[#1e1e1e]">
+        {/* RIGHT COLUMN - SIDEBAR */}
+        <div className="space-y-8 lg:pl-4 border-l-0 lg:border-l lg:border-[#1e1e1e]">
+          
+          {/* ABOUT */}
+          <section className="bg-[#111] border border-[#1e1e1e] rounded-[14px] p-6">
+            <h4 className="text-[11px] font-bold text-[var(--text-muted)] tracking-[0.2em] uppercase mb-5 pb-3 border-b border-[#222]">About the game</h4>
             
-            {/* ABOUT */}
-            <section className="bg-[#111] border border-[#1e1e1e] rounded-[16px] p-6">
-                <h4 className="text-[11px] font-bold text-[var(--text-muted)] tracking-[0.2em] uppercase mb-4 title-line">About the game</h4>
-                <div className="text-[14px] text-[#bbb] leading-relaxed mb-6">
-                    {game.description_raw ? (
-                        <p className="line-clamp-6">{game.description_raw}</p>
-                    ) : "No description provided."}
-                    {game.description_raw?.length > 300 && <span className="text-[var(--accent)] cursor-pointer mt-2 block font-medium hover:underline">Read more</span>}
-                </div>
+            <div className="text-[13px] text-[#bbb] leading-relaxed mb-6">
+              {game.description_raw ? (
+                <p className="line-clamp-5">{game.description_raw}</p>
+              ) : "No description provided."}
+            </div>
 
-                <div className="flex flex-wrap gap-2 mb-8">
-                    {game.genres?.map(g => (
-                        <span key={g.id} className="bg-[#1a1a1a] text-[12px] px-3 py-1.5 rounded-md border border-[#2a2a2a] text-[#ddd]">
-                            {g.name}
-                        </span>
-                    ))}
+            <div className="space-y-5">
+              {game.developers?.[0] && (
+                <div>
+                  <div className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] font-bold mb-2">Developer</div>
+                  <div className="text-[13px] text-white">{game.developers[0].name}</div>
                 </div>
+              )}
+              {game.publishers?.[0] && (
+                <div>
+                  <div className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] font-bold mb-2">Publisher</div>
+                  <div className="text-[13px] text-white">{game.publishers[0].name}</div>
+                </div>
+              )}
+              {game.released && (
+                <div>
+                  <div className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] font-bold mb-2">Release Date</div>
+                  <div className="text-[13px] text-white">{new Date(game.released).toLocaleDateString()}</div>
+                </div>
+              )}
+              {game.playtime > 0 && (
+                <div>
+                  <div className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] font-bold mb-2">Avg Playtime</div>
+                  <div className="text-[13px] text-white">{game.playtime} hours</div>
+                </div>
+              )}
+            </div>
+          </section>
 
-                <div className="grid grid-cols-2 gap-y-6 gap-x-4">
-                    <div>
-                        <div className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] mb-1">Developer</div>
-                        <div className="text-[14px] font-medium text-white line-clamp-1">{game.developers?.[0]?.name || "N/A"}</div>
-                    </div>
-                    <div>
-                        <div className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] mb-1">Publisher</div>
-                        <div className="text-[14px] font-medium text-white line-clamp-1">{game.publishers?.[0]?.name || "N/A"}</div>
-                    </div>
-                    <div>
-                        <div className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] mb-1">Release Date</div>
-                        <div className="text-[14px] font-medium text-white">{new Date(game.released).toLocaleDateString()}</div>
-                    </div>
-                    <div>
-                        <div className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] mb-1">Age Rating</div>
-                        <div className="text-[14px] font-medium text-white">
-                            {game.esrb_rating?.name ? <span className="border border-white/20 px-1.5 py-0.5 rounded shadow-sm">{game.esrb_rating.name}</span> : "N/A"}
-                        </div>
-                    </div>
-                </div>
+          {/* WHERE TO PLAY */}
+          {game.stores && game.stores.length > 0 && (
+            <section className="bg-[#111] border border-[#1e1e1e] rounded-[14px] p-6">
+              <h4 className="text-[11px] font-bold text-[var(--text-muted)] tracking-[0.2em] uppercase mb-4 pb-3 border-b border-[#222]">Where to play</h4>
+              <div className="space-y-3">
+                {game.stores.slice(0, 5).map((s) => (
+                  <a key={s.store.id} href={`https://${s.store.domain}`} target="_blank" rel="noreferrer" className="flex items-center justify-between p-3 bg-[#161616] border border-[#222] rounded-lg hover:border-[var(--accent)] hover:bg-[#1a1a1a] transition-all group">
+                    <div className="text-[13px] font-medium group-hover:text-[var(--accent)]">{s.store.name}</div>
+                    <FiArrowRight size={14} className="text-[var(--text-muted)] group-hover:text-[var(--accent)]" />
+                  </a>
+                ))}
+              </div>
             </section>
+          )}
 
-             {/* WHERE TO PLAY */}
-             <section className="bg-[#111] border border-[#1e1e1e] rounded-[16px] p-6">
-                 <h4 className="text-[11px] font-bold text-[var(--text-muted)] tracking-[0.2em] uppercase mb-4 title-line">Where to play</h4>
-                 <div className="space-y-2">
-                     {game.stores?.length > 0 ? game.stores.map((s) => (
-                         <a key={s.store.id} href={`https://${s.store.domain}`} target="_blank" rel="noreferrer" className="flex items-center justify-between p-3 bg-[#161616] border border-[#222] rounded-lg hover:border-[var(--accent)] hover:bg-[#1a1a1a] transition-all group">
-                             <div className="text-[14px] font-medium">{s.store.name}</div>
-                             <div className="text-[var(--text-muted)] text-[12px] group-hover:text-[var(--accent)] flex items-center gap-1">Get <FiArrowRight size={14} aria-hidden="true" /></div>
-                         </a>
-                     )) : (
-                         <div className="text-[13px] text-[var(--text-muted)] italic">Store data not available.</div>
-                     )}
-                 </div>
-             </section>
-
-             {/* TAGS */}
-             <section>
-                 <h4 className="text-[11px] font-bold text-[var(--text-muted)] tracking-[0.2em] uppercase mb-4">Tags</h4>
-                 <div className="flex flex-wrap gap-2">
-                     {game.tags?.slice(0, 10).map(t => (
-                         <span key={t.id} className="text-[12px] text-[#888] hover:text-white transition-colors cursor-pointer">#{t.name.toLowerCase()}</span>
-                     ))}
-                 </div>
-             </section>
+          {/* RATING */}
+          {game.esrb_rating && (
+            <section className="bg-[#111] border border-[#1e1e1e] rounded-[14px] p-6">
+              <h4 className="text-[11px] font-bold text-[var(--text-muted)] tracking-[0.2em] uppercase mb-4">Rating</h4>
+              <div className="bg-[#161616] border-2 border-[var(--accent)] rounded-lg px-4 py-3 text-center">
+                <div className="font-bold text-[14px] text-white">{game.esrb_rating.name}</div>
+              </div>
+            </section>
+          )}
 
         </div>
       </div>
 
       {lightboxOpen && (
-          <Lightbox 
-             images={screenshots} 
-             currentIndex={lightboxIndex} 
-             onClose={() => setLightboxOpen(false)}
-             onNavigate={(dir) => {
-                 if (dir === 'next') setLightboxIndex(i => (i + 1) % screenshots.length);
-                 if (dir === 'prev') setLightboxIndex(i => (i - 1 + screenshots.length) % screenshots.length);
-             }}
-          />
+        <Lightbox 
+          images={screenshots} 
+          currentIndex={lightboxIndex} 
+          onClose={() => setLightboxOpen(false)}
+          onNavigate={(dir) => {
+            if (dir === 'next') setLightboxIndex(i => (i + 1) % screenshots.length);
+            if (dir === 'prev') setLightboxIndex(i => (i - 1 + screenshots.length) % screenshots.length);
+          }}
+        />
       )}
 
       {showVerdictModal && (
-          <VerdictModal 
-             game={{ id: game.id, name: game.name, cover: game.background_image }}
-             currentVerdict={userVerdict}
-             onClose={() => setShowVerdictModal(false)}
-             onSuccess={(verdict) => {
-                 setUserVerdict(verdict);
-                 if (!dominantVerdict) { // optimistic UI update if first
-                    // full reload not necessary, just update user side
-                 }
-             }}
-          />
+        <VerdictModal 
+          game={{ id: game.id, name: game.name, cover: game.background_image }}
+          currentVerdict={userVerdict}
+          onClose={() => setShowVerdictModal(false)}
+          onSuccess={(verdict) => {
+            setUserVerdict(verdict);
+          }}
+        />
       )}
 
       {showReviewModal && (
-          <WriteReviewModal
-            game={{ id: game.id, name: game.name, cover: game.background_image }}
-            onClose={() => setShowReviewModal(false)}
-            onSuccess={(reviewId) => {
-                 // Toast handled globally maybe or here
-                 // Let's reload reviews or page for simplicity, or just optimistic append
-                 window.location.reload(); 
-            }}
-          />
+        <WriteReviewModal
+          game={{ id: game.id, name: game.name, cover: game.background_image }}
+          onClose={() => setShowReviewModal(false)}
+          onSuccess={(reviewId) => {
+            window.location.reload(); 
+          }}
+        />
       )}
 
     </div>

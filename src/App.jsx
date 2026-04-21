@@ -9,7 +9,6 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
-import Explore from './pages/Explore';
 import GameDetail from './pages/GameDetail';
 import MyProfile from './pages/MyProfile';
 import GameShelf from './pages/GameShelf';
@@ -67,7 +66,6 @@ function AppContent() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/explore" element={<Explore />} />
           <Route path="/game/:gameId" element={<GameDetail />} />
           <Route path="/debates" element={<Debates />} />
           <Route path="/debates/:debateId" element={<SingleDebate />} />
