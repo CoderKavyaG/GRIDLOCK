@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { auth, db } from "../firebase/firebase";
 import { onAuthStateChanged, signOut as firebaseSignOut } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import { generateRandomProfile } from "../utils/profileGenerator";
 
 const AuthContext = createContext();
 
@@ -26,38 +27,73 @@ export function AuthProvider({ children }) {
           const idTokenResult = await currentUser.getIdTokenResult();
           setIsAdmin(idTokenResult.claims?.role === 'admin');
 
-          const userRef = doc(db, "users", currentUser.uid);
-          const userSnap = await getDoc(userRef);
+          try {
+            const userRef = doc(db, "users", currentUser.uid);
+            
+            try {
+              const userSnap = await getDoc(userRef);
 
-          if (userSnap.exists()) {
-            const profile = userSnap.data();
-            setUserProfile(profile);
+              if (userSnap.exists()) {
+                const profile = userSnap.data();
+                setUserProfile(profile);
 
-            // Check if user is banned
-            if (profile.banned) {
-              await firebaseSignOut(auth);
-              setUser(null);
-              setUserProfile(null);
-              setIsAdmin(false);
-              return;
+                // Check if user is banned
+                if (profile.banned) {
+                  await firebaseSignOut(auth);
+                  setUser(null);
+                  setUserProfile(null);
+                  setIsAdmin(false);
+                  return;
+                }
+              } else {
+                // Generate random username and avatar for new users
+                const { username: randomUsername, avatar: randomAvatar } = generateRandomProfile();
+                
+                const newProfile = {
+                  uid: currentUser.uid,
+                  displayName: currentUser.displayName || randomUsername,
+                  avatar: currentUser.photoURL || randomAvatar,
+                  username: randomUsername,
+                  bio: "",
+                  joinedAt: new Date().toISOString(),
+                  gamesPlayed: 0,
+                  gamesWantToPlay: 0,
+                  gamesDropped: 0
+                };
+                await setDoc(userRef, newProfile);
+                setUserProfile(newProfile);
+              }
+            } catch (readError) {
+              if (readError.code === 'permission-denied') {
+                const { username: randomUsername, avatar: randomAvatar } = generateRandomProfile();
+                const minimalProfile = {
+                  uid: currentUser.uid,
+                  displayName: currentUser.displayName || randomUsername,
+                  avatar: currentUser.photoURL || randomAvatar,
+                  username: randomUsername
+                };
+                setUserProfile(minimalProfile);
+              } else {
+                throw readError;
+              }
             }
-          } else {
-            const newProfile = {
+          } catch (firestoreError) {
+            console.warn("Firestore profile fetch failed (non-critical):", firestoreError.code);
+            const { username: randomUsername, avatar: randomAvatar } = generateRandomProfile();
+            setUserProfile({
               uid: currentUser.uid,
-              displayName: currentUser.displayName || "",
-              avatar: currentUser.photoURL || "",
-              username: currentUser.email?.split("@")[0] || currentUser.uid.slice(0, 8),
+              displayName: currentUser.displayName || randomUsername,
+              avatar: currentUser.photoURL || randomAvatar,
+              username: randomUsername,
               bio: "",
               joinedAt: new Date().toISOString(),
               gamesPlayed: 0,
               gamesWantToPlay: 0,
               gamesDropped: 0
-            };
-            await setDoc(userRef, newProfile);
-            setUserProfile(newProfile);
+            });
           }
         } catch (error) {
-          console.error("Error fetching user profile:", error);
+          console.error("Auth error:", error);
           setIsAdmin(false);
         }
       } else {

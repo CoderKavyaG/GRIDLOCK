@@ -9,6 +9,7 @@ import { MoodGrid } from '../MoodGrid';
 import { FeatureComparison } from './FeatureComparison';
 import { CommunityReviewsGrid } from './CommunityReviewsGrid';
 import { CTABanner } from '../CTABanner';
+import { DevBanner } from '../DevBanner';
 import { useGames } from '../../hooks/useGames';
 import { rawg } from '../../api/rawg';
 
@@ -16,9 +17,12 @@ export const LoggedOutHome = ({ user }) => {
     const trending = useGames(rawg.trending);
     const topRated = useGames(rawg.topRated);
     const newReleases = useGames(rawg.newReleases);
+    
+    const isUsingMockData = trending.isUsingMockData || topRated.isUsingMockData || newReleases.isUsingMockData;
 
     return (
         <div className="animate-fade-in">
+            <DevBanner show={isUsingMockData} />
             {/* Optional greeting for signed-in users (doesn't change layout) */}
             {user && (
                 <div className="max-w-[1400px] mx-auto px-4 lg:px-8 pt-24 pb-8">

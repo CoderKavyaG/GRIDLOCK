@@ -1,12 +1,13 @@
 import React from 'react';
 import { FaChevronRight } from 'react-icons/fa';
+import { FiSearch, FiTrendingUp, FiBarChart2, FiMessageSquare } from 'react-icons/fi';
 
 export const ExplainerStrip = () => {
     const steps = [
-        { icon: "🔍", title: "Find a game", desc: "Search through 500k+ titles" },
-        { icon: "🗳️", title: "Cast your verdict", desc: "Must Play, Good Enough..." },
-        { icon: "📊", title: "See consensus", desc: "Live community GameMeter" },
-        { icon: "🔥", title: "Debate it", desc: "Discuss hot takes with players" }
+        { icon: FiSearch, title: "Find a game", desc: "Search through 500k+ titles" },
+        { icon: FiMessageSquare, title: "Cast your verdict", desc: "Must Play, Good Enough..." },
+        { icon: FiBarChart2, title: "See consensus", desc: "Live community GameMeter" },
+        { icon: FiTrendingUp, title: "Debate it", desc: "Discuss hot takes with players" }
     ];
 
     return (
@@ -17,11 +18,13 @@ export const ExplainerStrip = () => {
                 </h4>
                 
                 <div className="flex flex-col md:flex-row items-center justify-between gap-8 md:gap-4">
-                    {steps.map((step, idx) => (
+                    {steps.map((step, idx) => {
+                        const Icon = step.icon;
+                        return (
                         <React.Fragment key={idx}>
                             <div className="flex flex-col items-center text-center group">
-                                <div className="text-[32px] mb-4 transition-transform duration-300 group-hover:scale-110">
-                                    {step.icon}
+                                <div className="text-[40px] mb-4 transition-transform duration-300 group-hover:scale-110 text-[var(--accent)]">
+                                    <Icon size={40} />
                                 </div>
                                 <h5 className="text-[14px] font-black text-white uppercase tracking-wider mb-2">
                                     {step.title}
@@ -34,7 +37,8 @@ export const ExplainerStrip = () => {
                                 <FaChevronRight className="hidden md:block text-[#222] text-[20px]" />
                             )}
                         </React.Fragment>
-                    ))}
+                    );
+                    })}
                 </div>
             </div>
         </section>

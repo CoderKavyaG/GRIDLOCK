@@ -1,154 +1,79 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Helper functions
-    function isAuthenticated() {
-      return request.auth != null;
-    }
-
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
-    }
-
-    function isAdmin() {
-      return isAuthenticated() && request.auth.token.get('role') == 'admin';
-    }
-
-    function isBanned() {
-      return isAuthenticated() &&
-             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('banned', false) == true;
-    }
-
     // Users collection
     match /users/{userId} {
-      // Anyone can read user profiles (for public info)
+      // Anyone can read user profiles
       allow read: if true;
-
       // Users can create their own profile
-      allow create: if isOwner(userId);
-
-      // Users can update their own profile (except sensitive fields)
-      allow update: if isOwner(userId) && 
-                    !request.resource.data.diff(resource.data).affectedKeys().hasAny(['banned', 'isAdmin']);
-
-      // Only admins can delete users or update banned/admin status
-      allow delete: if isAdmin();
-      allow update: if isAdmin() && request.resource.data.diff(resource.data).affectedKeys().hasAny(['banned', 'isAdmin']);
+      allow create: if request.auth != null && request.auth.uid == userId;
+      // Users can update their own profile (except role/banned fields)
+      allow update: if request.auth != null && request.auth.uid == userId &&
+                    !request.resource.data.diff(resource.data).affectedKeys().hasAny(['banned', 'isAdmin', 'role']);
+      // Only admins can delete/update sensitive fields
+      allow delete: if request.auth != null && request.auth.token.get('role') == 'admin';
     }
 
     // Reviews collection
     match /reviews/{reviewId} {
-      // Anyone can read reviews
       allow read: if true;
-
-      // Authenticated users can create reviews
-      allow create: if isAuthenticated() && request.auth.uid == request.resource.data.uid;
-
-      // Only review author can update/delete their review
-      allow update, delete: if isAuthenticated() && request.auth.uid == resource.data.uid;
-
-      // Admins can delete any review
-      allow delete: if isAdmin();
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.uid;
     }
 
     // Debates collection
     match /debates/{debateId} {
-      // Anyone can read debates
       allow read: if true;
-
-      // Authenticated users can create debates
-      allow create: if isAuthenticated() && request.auth.uid == request.resource.data.creatorId;
-
-      // Only debate creator can update/delete their debate
-      allow update, delete: if isAuthenticated() && request.auth.uid == resource.data.creatorId;
-
-      // Admins can delete any debate
-      allow delete: if isAdmin();
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.creatorId;
     }
 
     // Collections collection
     match /collections/{collectionId} {
-      // Anyone can read collections
       allow read: if true;
-
-      // Authenticated users can create collections
-      allow create: if isAuthenticated() && request.auth.uid == request.resource.data.creatorId;
-
-      // Only collection creator can update/delete their collection
-      allow update, delete: if isAuthenticated() && request.auth.uid == resource.data.creatorId;
-
-      // Admins can delete any collection
-      allow delete: if isAdmin();
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.creatorId;
     }
 
     // Follows collection
     match /follows/{followId} {
-      // Only authenticated users can create follows
-      allow create: if isAuthenticated() && request.auth.uid == request.resource.data.followerId;
-
-      // Only the follower can read/delete their follows
-      allow read, delete: if isAuthenticated() && request.auth.uid == resource.data.followerId;
-
-      // Admins can read all follows
-      allow read: if isAdmin();
+      allow read: if request.auth != null && request.auth.uid == resource.data.followerId;
+      allow create: if request.auth != null;
+      allow delete: if request.auth != null && request.auth.uid == resource.data.followerId;
     }
 
-    // Reports collection (for user reports)
+    // Reports collection
     match /reports/{reportId} {
-      // Only authenticated users can create reports
-      allow create: if isAuthenticated();
-
-      // Only admins can read reports
-      allow read: if isAdmin();
-
-      // Admins can update/delete reports
-      allow update, delete: if isAdmin();
+      allow create: if request.auth != null;
+      allow read: if request.auth != null && request.auth.token.get('role') == 'admin';
+      allow update, delete: if request.auth != null && request.auth.token.get('role') == 'admin';
     }
 
-    // Audit log (admin only)
+    // Audit log
     match /audit/{entryId} {
-      // Only admins can read/write audit logs
-      allow read, write: if isAdmin();
+      allow read, write: if request.auth != null && request.auth.token.get('role') == 'admin';
     }
 
-    // Announcements (admin only for write)
+    // Announcements
     match /announcements/{announcementId} {
-      // Anyone can read announcements
       allow read: if true;
-
-      // Only admins can create/update/delete announcements
-      allow write: if isAdmin();
+      allow write: if request.auth != null && request.auth.token.get('role') == 'admin';
     }
 
-    // Votes collection (for game verdicts)
+    // Votes collection
     match /votes/{voteId} {
-      // Anyone can read votes
       allow read: if true;
-
-      // Authenticated users can create their own votes
-      allow create: if isAuthenticated() && request.auth.uid == request.resource.data.uid;
-
-      // Only vote author can update/delete their vote
-      allow update, delete: if isAuthenticated() && request.auth.uid == resource.data.uid;
-
-      // Admins can delete any vote
-      allow delete: if isAdmin();
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.uid;
     }
 
-    // Game shelf (subcollection under user)
+    // Game shelf
     match /gameShelf/{userId}/games/{gameId} {
-      // Only the user can read their game shelf
-      allow read: if isAuthenticated() && request.auth.uid == userId;
-
-      // Only the user can manage their game shelf
-      allow create, update, delete: if isAuthenticated() && request.auth.uid == userId;
-
-      // Admins can read all game shelves
-      allow read: if isAdmin();
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow create, update, delete: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Default deny for any other collections
+    // Default deny
     match /{document=**} {
       allow read, write: if false;
     }

@@ -102,7 +102,7 @@ export const LoggedInHome = () => {
 
                 <div className="px-6">
                     <h3 className="max-w-[1400px] mx-auto font-syne text-[28px] font-black text-white mb-8">
-                        Debates Heating Up 🔥
+                        Debates Heating Up
                     </h3>
                     <DebateCards limit={3} horizontal={true} />
                 </div>

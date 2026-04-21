@@ -88,7 +88,7 @@ export default function Feed() {
     return (
       <div className="min-h-screen bg-[#0a0a0a] pt-[72px] flex items-center justify-center">
         <EmptyState
-          icon="🔒"
+          icon="Lock"
           title="Sign in to see your feed"
           subtitle="Follow other gamers to see their reviews and activity."
           ctaText="Sign In"
@@ -132,7 +132,7 @@ export default function Feed() {
           </div>
         ) : feedItems.length === 0 ? (
           <EmptyState
-            icon="📭"
+            icon="Mail"
             title="Your feed is empty"
             subtitle="Follow some gamers to see their reviews and activity here."
             ctaText="Explore Users"

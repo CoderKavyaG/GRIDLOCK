@@ -318,7 +318,7 @@ export default function CollectionDetail() {
                 </div>
             ) : (
                 <EmptyState 
-                   icon="📋"
+                   icon="List"
                    title="Empty Collection"
                    subtitle={isOwner ? "This collection needs some heat. Add games to get started." : "This collection doesn't have any games yet."}
                    ctaText={isOwner && !showSearch ? "Add Games +" : null}

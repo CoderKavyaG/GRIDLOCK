@@ -68,6 +68,18 @@ export const MoodGrid = () => {
         return () => { isMounted = false; };
     }, []);
 
+    if (!loading && Object.keys(backgrounds).length === 0) {
+        return (
+            <div className="w-full py-16 bg-[#0a0a0a] flex items-center justify-center">
+                <div className="text-center max-w-md">
+                    <h3 className="text-2xl font-bold text-white mb-2">Explore by Mood</h3>
+                    <p className="text-[#888] mb-6">Unable to load mood categories. Please refresh the page.</p>
+                    <button onClick={() => window.location.reload()} className="px-6 py-3 bg-[var(--accent)] text-black font-bold rounded-full hover:brightness-110 transition-all">Refresh</button>
+                </div>
+            </div>
+        );
+    }
+
     const containerVariants = {
         hidden: { opacity: 0 },
         show: {

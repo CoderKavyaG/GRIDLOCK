@@ -4,9 +4,9 @@ import { rawg } from "../../api/rawg";
 import { FiArrowRight } from "react-icons/fi";
 
 export const EditorialHero = () => {
-    const { data: topGames, loading } = useGames(rawg.topRated);
+    const { data: topGames, loading, error, isUsingMockData } = useGames(rawg.topRated);
 
-    if (loading || topGames.length < 4) {
+    if (loading) {
         return (
             <div className="w-full h-[85vh] bg-[#0a0a0a] animate-pulse flex gap-4 p-4">
                 <div className="flex-[0.6] bg-[#111] rounded-2xl"></div>
@@ -14,6 +14,18 @@ export const EditorialHero = () => {
                     <div className="flex-1 bg-[#111] rounded-2xl"></div>
                     <div className="flex-1 bg-[#111] rounded-2xl"></div>
                     <div className="flex-1 bg-[#111] rounded-2xl"></div>
+                </div>
+            </div>
+        );
+    }
+
+    if (error || !topGames || topGames.length < 4) {
+        return (
+            <div className="w-full h-[85vh] bg-[#0a0a0a] flex items-center justify-center p-4">
+                <div className="text-center max-w-md">
+                    <h3 className="text-2xl font-bold text-white mb-2">Editor's Pick</h3>
+                    <p className="text-[#888] mb-6">Unable to load featured games. Please refresh the page.</p>
+                    <button onClick={() => window.location.reload()} className="px-6 py-3 bg-[var(--accent)] text-black font-bold rounded-full hover:brightness-110 transition-all">Refresh</button>
                 </div>
             </div>
         );

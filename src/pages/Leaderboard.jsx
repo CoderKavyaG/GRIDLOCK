@@ -143,7 +143,7 @@ export default function Leaderboard() {
           <div className="space-y-4">
             {topReviewers.length === 0 ? (
               <EmptyState
-                icon="🏆"
+                icon="T"
                 title="No reviews yet"
                 subtitle="Be the first to write a review and top the leaderboard!"
                 ctaText="Write a Review"
@@ -188,7 +188,7 @@ export default function Leaderboard() {
           <div className="space-y-4">
             {topGames.length === 0 ? (
               <EmptyState
-                icon="🎮"
+                icon="G"
                 title="No games reviewed yet"
                 subtitle="Start reviewing games to see them on the leaderboard!"
                 ctaText="Explore Games"

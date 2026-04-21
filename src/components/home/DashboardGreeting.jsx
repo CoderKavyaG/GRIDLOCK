@@ -14,10 +14,10 @@ export const DashboardGreeting = ({ stats }) => {
     };
 
     const actions = [
-        { label: "Log a Game", icon: "🎮", link: "/explore" },
-        { label: "Write a Review", icon: "✍️", link: "/explore" },
-        { label: "Join a Debate", icon: "🔥", link: "/debates" },
-        { label: "New Collection", icon: "📚", link: "/collections/new" },
+        { label: "Log a Game", icon: "G", link: "/" },
+        { label: "Write a Review", icon: "R", link: "/" },
+        { label: "Join a Debate", icon: "D", link: "/debates" },
+        { label: "New Collection", icon: "Books", link: "/collections/new" },
     ];
 
     return (
@@ -26,7 +26,7 @@ export const DashboardGreeting = ({ stats }) => {
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
                     <div className="space-y-4">
                         <h1 className="font-syne text-[36px] md:text-[48px] font-black text-white leading-tight">
-                            {getTimeOfDay()}, <span className="text-[var(--accent)]">{userProfile?.displayName || userProfile?.username}</span>. 👋
+                            {getTimeOfDay()}, <span className="text-[var(--accent)]">{userProfile?.displayName || userProfile?.username}</span>.
                         </h1>
                         <p className="text-[16px] text-[#777] font-medium">
                             You've played <span className="text-white font-bold">{stats.played || 0}</span> games. 

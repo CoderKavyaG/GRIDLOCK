@@ -146,8 +146,8 @@ export default function MyProfile() {
                 {/* STATS ROW */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
                     {[
-                        { label: "Games Played", val: stats.played, icon: "🎮", color: "text-[#2ed573]" },
-                        { label: "Want to Play", val: stats.wantToPlay, icon: "📋", color: "text-[#f39c12]" },
+                        { label: "Games Played", val: stats.played, icon: "Controller", color: "text-[#2ed573]" },
+                        { label: "Want to Play", val: stats.wantToPlay, icon: "List", color: "text-[#f39c12]" },
                         { label: "Dropped", val: stats.dropped, icon: "❌", color: "text-[#e74c3c]" },
                         { label: "Reviews Written", val: stats.reviews, icon: "✍️", color: "text-[var(--accent)]" },
                     ].map((s, i) => (
@@ -213,7 +213,7 @@ export default function MyProfile() {
                                         ))}
                                     </div>
                                 ) : (
-                                    <EmptyState icon="🎮" title="No games played yet" subtitle="Start tracking your games to see them here." ctaText="Add Games →" ctaLink="/explore" />
+                                    <EmptyState icon="G" title="No games played yet" subtitle="Start tracking your games to see them here." ctaText="Add Games" ctaLink="/" />
                                 )}
                             </section>
 
@@ -235,14 +235,14 @@ export default function MyProfile() {
                                                         <Link to={`/game/${r.gameId}`} className="font-bold text-[15px] hover:text-[var(--accent)] transition-colors">{r.gameName}</Link>
                                                         <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] px-2 py-0.5 border border-[#333] rounded">{r.verdict}</span>
                                                     </div>
-                                                    <p className="text-[13px] text-[#aaa] mt-2 line-clamp-2">{r.spoiler ? "⚠️ Spoiler review hidden." : r.reviewText || "No text provided."}</p>
+                                                    <p className="text-[13px] text-[#aaa] mt-2 line-clamp-2">{r.spoiler ? "Spoiler review hidden." : r.reviewText || "No text provided."}</p>
                                                     <div className="text-[11px] text-[#666] mt-3">{new Date(r.createdAt).toLocaleDateString()}</div>
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
                                 ) : (
-                                    <EmptyState icon="✍️" title="No reviews written" subtitle="Share your thoughts on games you've played." />
+                                    <EmptyState icon="R" title="No reviews written" subtitle="Share your thoughts on games you've played." />
                                 )}
                             </section>
                         </div>
@@ -350,7 +350,7 @@ export default function MyProfile() {
                                 {collections.map(c => (
                                     <Link key={c.id} to={`/collections/${c.id}`} className="bg-[#161616] border border-[#222] rounded-[12px] overflow-hidden group hover:border-[#555] transition-all">
                                         <div className="h-[140px] bg-[#222] flex items-center justify-center text-[32px] border-b border-[#222]">
-                                           📋 
+                                           List 
                                         </div>
                                         <div className="p-4">
                                             <h3 className="font-bold text-[16px] text-white group-hover:text-[var(--accent)] transition-colors">{c.title}</h3>
@@ -361,7 +361,7 @@ export default function MyProfile() {
                                 ))}
                             </div>
                         ) : (
-                            <EmptyState icon="📚" title="No collections yet" ctaText="Create One" ctaLink="/collections/new" />
+                            <EmptyState icon="Books" title="No collections yet" ctaText="Create One" ctaLink="/collections/new" />
                         )}
                     </div>
                 )}
@@ -369,7 +369,7 @@ export default function MyProfile() {
                 {/* TAB 5: ACTIVITY */}
                 {activeTab === "activity" && (
                     <div className="max-w-2xl mx-auto py-8">
-                        <EmptyState icon="⚡" title="Activity Feed" subtitle="Your recent actions will appear here." />
+                        <EmptyState icon="A" title="Activity Feed" subtitle="Your recent actions will appear here." />
                     </div>
                 )}
                 </>

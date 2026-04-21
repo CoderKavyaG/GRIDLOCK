@@ -58,7 +58,7 @@ export default function Guidelines() {
 
           <div className="text-center pt-8 border-t border-[#222]">
             <p className="text-[#666] text-sm">
-              These guidelines help maintain a positive community. Thank you for being part of GRIDLOCK! 🎮
+              These guidelines help maintain a positive community. Thank you for being part of GRIDLOCK!
             </p>
           </div>
         </div>

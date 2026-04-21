@@ -123,7 +123,7 @@ export default function MyCollections() {
                 </div>
             ) : (
                  <EmptyState 
-                    icon="📚"
+                    icon="Books"
                     title="No collections yet."
                     subtitle="Bundle your favourite RPGs, ranking lists, or just your backlog into sharable collections."
                     ctaText="Create First Collection →"

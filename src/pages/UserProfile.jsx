@@ -169,7 +169,7 @@ export default function UserProfile() {
     return (
       <div className="min-h-screen bg-[#0a0a0a] pt-[72px] flex items-center justify-center">
         <EmptyState
-          icon="👤"
+          icon="User"
           title="User not found"
           subtitle={`No player with username @${username} exists.`}
           ctaText="Back to Home"
@@ -330,14 +330,14 @@ export default function UserProfile() {
                             <Link to={`/game/${r.gameId}`} className="font-bold text-[15px] hover:text-[var(--accent)] transition-colors truncate">{r.gameName}</Link>
                             <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] px-2 py-0.5 border border-[#333] rounded shrink-0">{r.verdict}</span>
                           </div>
-                          <p className="text-[13px] text-[#aaa] line-clamp-2">{r.spoiler ? "⚠️ Spoiler review." : r.reviewText}</p>
+                          <p className="text-[13px] text-[#aaa] line-clamp-2">{r.spoiler ? "Spoiler review." : r.reviewText}</p>
                           <div className="text-[11px] text-[#555] mt-2">{new Date(r.createdAt).toLocaleDateString()}</div>
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <EmptyState icon="✍️" title="No reviews yet" subtitle="This player hasn't written any reviews." />
+                  <EmptyState icon="R" title="No reviews yet" subtitle="This player hasn't written any reviews." />
                 )}
               </section>
             </div>
@@ -405,7 +405,7 @@ export default function UserProfile() {
                 <p className="text-[14px] text-[#ddd] leading-[1.6]">{r.reviewText}</p>
               </div>
             )) : (
-              <EmptyState icon="✍️" title="No reviews written yet." />
+              <EmptyState icon="R" title="No reviews written yet." />
             )}
           </div>
         )}
@@ -417,7 +417,7 @@ export default function UserProfile() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {publicCollections.map(c => (
                   <Link key={c.id} to={`/collections/${c.id}`} className="bg-[#161616] border border-[#222] rounded-xl overflow-hidden group hover:border-[#444] transition-colors">
-                    <div className="h-[120px] bg-[#222] border-b border-[#222] flex items-center justify-center text-3xl">📋</div>
+                    <div className="h-[120px] bg-[#222] border-b border-[#222] flex items-center justify-center text-3xl">List</div>
                     <div className="p-4">
                       <h3 className="font-bold text-[16px] group-hover:text-[var(--accent)] transition-colors">{c.title}</h3>
                       <p className="text-[12px] text-[#666] mt-1 line-clamp-1">{c.description}</p>
@@ -427,7 +427,7 @@ export default function UserProfile() {
                 ))}
               </div>
             ) : (
-              <EmptyState icon="📚" title="No public collections" subtitle="This player hasn't shared any collections yet." />
+              <EmptyState icon="Books" title="No public collections" subtitle="This player hasn't shared any collections yet." />
             )}
           </div>
         )}
