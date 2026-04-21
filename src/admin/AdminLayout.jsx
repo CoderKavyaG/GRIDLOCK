@@ -9,6 +9,7 @@ function getTitle(pathname) {
   if (pathname.startsWith("/admin/users")) return "Users";
   if (pathname.startsWith("/admin/reviews")) return "Reviews";
   if (pathname.startsWith("/admin/debates")) return "Debates";
+  if (pathname.startsWith("/admin/moderation")) return "Approval Queue";
   if (pathname.startsWith("/admin/reports")) return "Reports";
   if (pathname.startsWith("/admin/analytics")) return "Analytics";
   if (pathname.startsWith("/admin/announcements")) return "Announcements";
@@ -29,6 +30,7 @@ const navSections = [
       { label: "Users", to: "/admin/users", icon: FiUsers },
       { label: "Reviews", to: "/admin/reviews", icon: FiMessageSquare },
       { label: "Debates", to: "/admin/debates", icon: FiMessageSquare },
+      { label: "Approval Queue", to: "/admin/moderation", icon: FiAlertCircle },
       { label: "Reports", to: "/admin/reports", icon: FiAlertCircle },
     ],
   },

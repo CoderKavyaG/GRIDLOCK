@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { db } from "../firebase/firebase";
-import { collection, query, orderBy, getDocs } from "firebase/firestore";
+import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
 import EmptyState from "../components/EmptyState";
 import SEO from "../components/SEO";
 import { FiClock, FiThumbsUp, FiThumbsDown, FiArrowRight } from "react-icons/fi";
@@ -19,8 +19,12 @@ export default function Debates() {
       try {
         const dRef = collection(db, "debates");
         const orderField = activeTab === 'hot' ? 'agreeCount' : 'createdAt'; 
-        // using agreeCount as proxy for 'hot' for now if hot bool isn't reliable
-        const q = query(dRef, orderBy(orderField, "desc")); 
+        // Only fetch approved debates
+        const q = query(
+          dRef, 
+          where("approved", "==", true),
+          orderBy(orderField, "desc")
+        ); 
         
         const snapshot = await getDocs(q);
         const list = [];
@@ -28,7 +32,7 @@ export default function Debates() {
             list.push({ id: doc.id, ...doc.data() });
         });
         
-        // Mock data if empty for demo purposes (usually handled via actual DB seed)
+        // Mock data if empty for demo purposes
         if (list.length === 0) {
              const mock1 = {
                  id: "demo_1",
@@ -39,7 +43,8 @@ export default function Debates() {
                  gameCover: "https://media.rawg.io/media/games/5ec/5ecac5cb026ec26a56efdf5ac6f6cf56.jpg",
                  agreeCount: 342,
                  disagreeCount: 1205,
-                 createdAt: new Date().toISOString()
+                 createdAt: new Date().toISOString(),
+                 approved: true
              };
              const mock2 = {
                  id: "demo_2",
@@ -50,7 +55,8 @@ export default function Debates() {
                  gameCover: "https://media.rawg.io/media/games/b29/b294fdd866dcdb643e7bab370a552855.jpg",
                  agreeCount: 890,
                  disagreeCount: 885,
-                 createdAt: new Date().toISOString()
+                 createdAt: new Date().toISOString(),
+                 approved: true
              };
              setDebates([mock1, mock2]);
         } else {

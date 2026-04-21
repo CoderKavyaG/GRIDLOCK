@@ -44,21 +44,34 @@ export default function GameDetail() {
     const fetchGameData = async () => {
       setLoading(true);
       try {
-        const [gameRes, screensRes, moviesRes] = await Promise.all([
-          fetch(rawg.gameDetails(gameId)),
-          fetch(rawg.gameScreenshots(gameId)),
-          fetch(rawg.gameMovies(gameId))
-        ]);
-
+        const gameRes = await fetch(rawg.gameDetails(gameId));
         const gameData = await gameRes.json();
-        const screensData = await screensRes.json();
-        const moviesData = await moviesRes.json();
-
         setGame(gameData);
-        setScreenshots(screensData.results || []);
-        
-        if (moviesData.results && moviesData.results.length > 0) {
-          setTrailer(moviesData.results[0]);
+
+        // Try to fetch screenshots
+        try {
+          const screensRes = await fetch(rawg.gameScreenshots(gameId));
+          if (screensRes.ok) {
+            const screensData = await screensRes.json();
+            setScreenshots(screensData.results || []);
+          }
+        } catch (err) {
+          console.warn("Failed to fetch screenshots:", err.message);
+          setScreenshots([]);
+        }
+
+        // Try to fetch movies/trailers
+        try {
+          const moviesRes = await fetch(rawg.gameMovies(gameId));
+          if (moviesRes.ok) {
+            const moviesData = await moviesRes.json();
+            if (moviesData.results && moviesData.results.length > 0) {
+              setTrailer(moviesData.results[0]);
+            }
+          }
+        } catch (err) {
+          console.warn("Failed to fetch movies:", err.message);
+          setTrailer(null);
         }
       } catch (err) {
         console.error("Error fetching game data:", err);
@@ -74,9 +87,15 @@ export default function GameDetail() {
   useEffect(() => {
     const fetchFirebaseData = async () => {
       try {
-        // Fetch community reviews mapped to this game
+        // Fetch community reviews mapped to this game (only approved ones)
         const reviewsRef = collection(db, "reviews");
-        const q = query(reviewsRef, where("gameId", "==", parseInt(gameId)), orderBy("createdAt", "desc"), limit(10));
+        const q = query(
+          reviewsRef, 
+          where("gameId", "==", parseInt(gameId)),
+          where("approved", "==", true),
+          orderBy("createdAt", "desc"), 
+          limit(10)
+        );
         const reviewDocs = await getDocs(q);
         
         const fetchedReviews = [];
@@ -280,22 +299,6 @@ export default function GameDetail() {
                 />
               </div>
 
-              {userVerdict ? (
-                <button 
-                  onClick={() => setShowVerdictModal(true)}
-                  className="h-12 px-8 font-syne font-black rounded-lg border-2 border-[var(--accent)] flex items-center gap-2 transition-all hover:bg-[var(--accent)] hover:text-black shadow-[0_0_20px_rgba(232,255,71,0.1)] hover:shadow-[0_0_30px_rgba(232,255,71,0.2)]"
-                >
-                  Your Verdict: <span>{getVerdictMetadata(userVerdict).label}</span>
-                </button>
-              ) : (
-                <button 
-                  onClick={() => user ? setShowVerdictModal(true) : addToast("Sign in to cast verdict", "error")}
-                  className="h-12 px-8 bg-white text-black hover:bg-[var(--accent)] hover:scale-105 active:scale-95 font-syne font-black rounded-lg transition-all text-[13px] uppercase tracking-wider"
-                >
-                  Cast Your Verdict
-                </button>
-              )}
-
               <button 
                 onClick={() => user ? setShowReviewModal(true) : addToast("Sign in to write review", "error")}
                 className="h-12 px-8 bg-[#161616] text-white hover:bg-[#222] border border-[#2a2a2a] font-bold text-[14px] transition-colors rounded-lg"
@@ -335,11 +338,11 @@ export default function GameDetail() {
         {/* LEFT COLUMN - REVIEWS & DETAILS */}
         <div className="space-y-12">
 
-          {/* GAMEMETER SECTION - ENHANCED */}
-          <section className="bg-[#0f0f0f] border border-[#1e1e1e] rounded-[16px] p-8 md:p-12 relative overflow-hidden">
+          {/* GAMEMETER SECTION - ENHANCED & CLICKABLE */}
+          <section className="bg-[#0f0f0f] border border-[#1e1e1e] rounded-[16px] p-8 md:p-12 relative overflow-hidden sticky top-20 z-10">
             <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--accent)] filter blur-[100px] opacity-[0.05] pointer-events-none"></div>
             
-            <div className="mb-10">
+            <div className="mb-8">
               <span className="inline-block bg-[#1a1a1a] text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-bold px-4 py-2 rounded-full mb-6 border border-[#2a2a2a]">
                 Community Verdict
               </span>
@@ -363,7 +366,7 @@ export default function GameDetail() {
               </div>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4">
               {[
                 { id: 'masterpiece', label: "Perfection", color: "#a855f7", icon: HiSparkles },
                 { id: 'mustPlay', label: "Go for it", color: "#2ed573", icon: HiHandThumbUp },
@@ -372,8 +375,17 @@ export default function GameDetail() {
               ].map(v => {
                 const count = verdictStats[v.id] || 0;
                 const percent = verdictStats.total > 0 ? Math.round((count / verdictStats.total) * 100) : 0;
+                const isUserVote = userVerdict === v.id;
                 return (
-                  <div key={v.id} className="flex items-center gap-4">
+                  <button
+                    key={v.id}
+                    onClick={() => user ? setShowVerdictModal(true) : addToast("Sign in to vote", "error")}
+                    className={`w-full flex items-center gap-4 p-4 rounded-lg transition-all border ${
+                      isUserVote
+                        ? 'border-[var(--accent)] bg-[var(--accent)]/10'
+                        : 'border-[#222] hover:border-[#333] hover:bg-[#1a1a1a]'
+                    }`}
+                  >
                     <div className="flex items-center gap-2 w-[140px] text-[14px] font-medium flex-shrink-0">
                       <v.icon size={18} aria-hidden="true" style={{color: v.color}} />
                       <span className="text-white">{v.label}</span>
@@ -389,7 +401,12 @@ export default function GameDetail() {
                     <div className="text-right w-[50px] text-[13px] font-bold text-white">
                       {percent}%
                     </div>
-                  </div>
+                    {isUserVote && (
+                      <div className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-[var(--accent)] text-black">
+                        Your Vote
+                      </div>
+                    )}
+                  </button>
                 );
               })}
             </div>

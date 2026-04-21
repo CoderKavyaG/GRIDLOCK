@@ -48,7 +48,8 @@ export default function WriteReviewModal({ game, onClose, onSuccess }) {
         reviewText: reviewText,
         likes: [],
         createdAt: new Date().toISOString(),
-        spoiler: spoiler
+        spoiler: spoiler,
+        approved: false  // Requires admin approval before showing to others
       };
       
       const docRef = await addDoc(collection(db, "reviews"), newReview);

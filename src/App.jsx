@@ -38,6 +38,7 @@ import AdminReports from './admin/pages/AdminReports';
 import AdminAnalytics from './admin/pages/AdminAnalytics';
 import AdminAnnouncements from './admin/pages/AdminAnnouncements';
 import AdminAuditLog from './admin/pages/AdminAuditLog';
+import { AdminDashboard as AdminModeration } from './admin/pages/AdminModeration';
 
 function App() {
   return (
@@ -82,6 +83,7 @@ function AppContent() {
               <Route path="users/:uid" element={<AdminUserDetail />} />
               <Route path="reviews" element={<AdminReviews />} />
               <Route path="debates" element={<AdminDebates />} />
+              <Route path="moderation" element={<AdminModeration />} />
               <Route path="reports" element={<AdminReports />} />
               <Route path="analytics" element={<AdminAnalytics />} />
               <Route path="announcements" element={<AdminAnnouncements />} />

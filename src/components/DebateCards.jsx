@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { db } from '../firebase/firebase';
-import { collection, query, orderBy, limit as fsLimit, getDocs } from 'firebase/firestore';
+import { collection, query, where, orderBy, limit as fsLimit, getDocs } from 'firebase/firestore';
 import { BiTrendingUp } from 'react-icons/bi';
 import { FiMessageSquare, FiArrowRight } from 'react-icons/fi';
 
@@ -14,8 +14,13 @@ export const DebateCards = ({ limit = 3, horizontal = false, titleVisibility = t
         const fetchDebates = async () => {
             try {
                 const dRef = collection(db, "debates");
-                // In a real scenario, we'd order by popularity (agreeCount + disagreeCount)
-                const q = query(dRef, orderBy("createdAt", "desc"), fsLimit(limit));
+                // Only fetch approved debates
+                const q = query(
+                    dRef, 
+                    where("approved", "==", true),
+                    orderBy("createdAt", "desc"), 
+                    fsLimit(limit)
+                );
                 const snapshot = await getDocs(q);
                 const list = [];
                 snapshot.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
