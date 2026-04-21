@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { rawg } from "../api/rawg";
 import { db } from "../firebase/firebase";
-import { collection, query, where, getDocs, orderBy, limit, doc, getDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, orderBy, limit, doc, getDoc, addDoc } from "firebase/firestore";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import SEO from "../components/SEO";
@@ -40,6 +40,9 @@ export default function GameDetail() {
   
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [expandedReview, setExpandedReview] = useState(null);
+  const [reviewComments, setReviewComments] = useState({});
+  const [newCommentText, setNewCommentText] = useState({});
 
   // Fetch Game Details
   useEffect(() => {
@@ -231,6 +234,54 @@ export default function GameDetail() {
           case 'masterpiece': return { label: "MASTERPIECE", color: "#a855f7" };
           default: return { label: "NO VERDICT", color: "#666" };
       }
+  };
+
+  const fetchReviewComments = async (reviewId) => {
+    try {
+      const cRef = collection(db, `reviews/${reviewId}/comments`);
+      const q = query(cRef, orderBy("createdAt", "desc"));
+      const snapshot = await getDocs(q);
+      
+      const comments = [];
+      snapshot.forEach(doc => {
+        comments.push({ id: doc.id, ...doc.data() });
+      });
+      
+      setReviewComments(prev => ({ ...prev, [reviewId]: comments }));
+    } catch (err) {
+      console.error("Error fetching review comments:", err);
+    }
+  };
+
+  const handlePostReviewComment = async (reviewId) => {
+    if (!user) {
+      addToast("Sign in to comment", "error");
+      return;
+    }
+    
+    const commentText = newCommentText[reviewId];
+    if (!commentText || !commentText.trim()) return;
+
+    try {
+      const cRef = collection(db, `reviews/${reviewId}/comments`);
+      const newComment = {
+        uid: user.uid,
+        username: user.username || userProfile?.username || "Player",
+        avatar: userProfile?.avatar || "",
+        displayName: userProfile?.displayName || user.displayName || "Player",
+        text: commentText.trim(),
+        createdAt: new Date().toISOString(),
+        likes: 0
+      };
+      
+      await addDoc(cRef, newComment);
+      setNewCommentText(prev => ({ ...prev, [reviewId]: "" }));
+      addToast("Comment posted ✓", "success");
+      await fetchReviewComments(reviewId);
+    } catch (err) {
+      console.error("Error posting comment:", err);
+      addToast("Failed to post comment", "error");
+    }
   };
 
   const getMetacriticColor = (score) => {
@@ -526,42 +577,124 @@ export default function GameDetail() {
             ) : reviews.length > 0 || verdictOnlyEntries.length > 0 ? (
               <div className="space-y-5">
                 {reviews.map(review => (
-                  <div key={review.id} className="bg-[#161616] border border-[#222] rounded-[14px] p-6 transition-all hover:border-[#333] hover:bg-[#1a1a1a]">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3 flex-1">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-[var(--accent)] to-[#a855f7] flex items-center justify-center font-bold text-black border-2 border-black object-cover overflow-hidden flex-shrink-0">
-                          {review.avatar ? <img src={review.avatar} alt="Avatar" className="w-full h-full object-cover"/> : review.displayName?.charAt(0)}
+                  <div key={review.id}>
+                    <div className="bg-[#161616] border border-[#222] rounded-[14px] p-6 transition-all hover:border-[#333] hover:bg-[#1a1a1a]">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3 flex-1">
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-[var(--accent)] to-[#a855f7] flex items-center justify-center font-bold text-black border-2 border-black object-cover overflow-hidden flex-shrink-0">
+                            {review.avatar ? <img src={review.avatar} alt="Avatar" className="w-full h-full object-cover"/> : review.displayName?.charAt(0)}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="font-bold text-[15px] text-white truncate">{review.displayName}</div>
+                            <div className="text-[var(--text-muted)] text-[12px]">@{review.username} • {review.createdAt ? new Date(review.createdAt).toLocaleDateString() : 'Recently'}</div>
+                          </div>
                         </div>
-                        <div className="min-w-0">
-                          <div className="font-bold text-[15px] text-white truncate">{review.displayName}</div>
-                          <div className="text-[var(--text-muted)] text-[12px]">@{review.username} • {review.createdAt ? new Date(review.createdAt).toLocaleDateString() : 'Recently'}</div>
+                        
+                        <div className={`px-4 py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider border flex-shrink-0 ml-4`}
+                          style={{ 
+                            borderColor: `${getVerdictMetadata(review.verdict).color}40`,
+                            backgroundColor: `${getVerdictMetadata(review.verdict).color}15`,
+                            color: getVerdictMetadata(review.verdict).color
+                          }}>
+                          {getVerdictMetadata(review.verdict).label}
                         </div>
                       </div>
-                      
-                      <div className={`px-4 py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider border flex-shrink-0 ml-4`}
-                        style={{ 
-                          borderColor: `${getVerdictMetadata(review.verdict).color}40`,
-                          backgroundColor: `${getVerdictMetadata(review.verdict).color}15`,
-                          color: getVerdictMetadata(review.verdict).color
-                        }}>
-                        {getVerdictMetadata(review.verdict).label}
+
+                      {review.reviewText && (
+                        <p className="text-[15px] text-[#ddd] leading-[1.6] mb-4">
+                          {review.reviewText.length > 300 ? `${review.reviewText.substring(0, 300)}...` : review.reviewText}
+                        </p>
+                      )}
+
+                      <div className="pt-4 border-t border-[#222] flex items-center gap-6">
+                        <button className="flex items-center gap-2 text-[12px] text-[var(--text-muted)] hover:text-[#2ed573] transition-colors font-medium">
+                          <HiHandThumbUp size={14} aria-hidden="true" /> Helpful ({(review.likes || []).length})
+                        </button>
+                        <button 
+                          onClick={() => {
+                            if (expandedReview === review.id) {
+                              setExpandedReview(null);
+                            } else {
+                              setExpandedReview(review.id);
+                              if (!reviewComments[review.id]) {
+                                fetchReviewComments(review.id);
+                              }
+                            }
+                          }}
+                          className="text-[12px] text-[#666] hover:text-white transition-colors font-medium"
+                        >
+                          {expandedReview === review.id ? "Hide" : "Comments"}
+                        </button>
+                        <button className="text-[12px] text-[#666] hover:text-[#ff4757] transition-colors ml-auto">
+                          Report
+                        </button>
                       </div>
                     </div>
 
-                    {review.reviewText && (
-                      <p className="text-[15px] text-[#ddd] leading-[1.6] mb-4">
-                        {review.reviewText.length > 300 ? `${review.reviewText.substring(0, 300)}...` : review.reviewText}
-                      </p>
+                    {/* COMMENTS SECTION */}
+                    {expandedReview === review.id && (
+                      <div className="bg-[#0f0f0f] border border-[#222] border-t-0 rounded-b-[14px] p-6 space-y-4">
+                        {/* Comment Input */}
+                        {user ? (
+                          <div className="flex gap-3 mb-6">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[var(--accent)] to-[#a855f7] flex items-center justify-center font-bold text-black text-sm border-2 border-black overflow-hidden flex-shrink-0">
+                              {userProfile?.avatar ? <img src={userProfile.avatar} alt="Avatar" className="w-full h-full object-cover"/> : user.displayName?.charAt(0)}
+                            </div>
+                            <div className="flex-1">
+                              <textarea 
+                                value={newCommentText[review.id] || ""}
+                                onChange={(e) => setNewCommentText(prev => ({ ...prev, [review.id]: e.target.value }))}
+                                placeholder="Share your thoughts on this review..."
+                                className="w-full bg-[#111] border border-[#2a2a2a] rounded-lg p-3 text-[13px] focus:outline-none focus:border-[var(--accent)] transition-all resize-none min-h-[80px] placeholder:text-[#555]"
+                              ></textarea>
+                              <div className="flex justify-end gap-2 mt-2">
+                                <button 
+                                  onClick={() => setNewCommentText(prev => ({ ...prev, [review.id]: "" }))}
+                                  className="px-4 h-9 text-[12px] font-bold text-[#666] hover:text-white transition-colors"
+                                >
+                                  Cancel
+                                </button>
+                                <button 
+                                  onClick={() => handlePostReviewComment(review.id)}
+                                  disabled={!newCommentText[review.id] || !newCommentText[review.id].trim()}
+                                  className="px-4 h-9 bg-[var(--accent)] text-black font-bold rounded-lg text-[12px] transition-all hover:brightness-105 disabled:opacity-50"
+                                >
+                                  Comment
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-center py-4 text-[#666]">
+                            <p className="text-[12px] mb-2">Sign in to comment</p>
+                          </div>
+                        )}
+
+                        {/* Comments List */}
+                        {reviewComments[review.id] && reviewComments[review.id].length > 0 ? (
+                          <div className="space-y-3 pt-4 border-t border-[#222]">
+                            {reviewComments[review.id].map(comment => (
+                              <div key={comment.id} className="flex gap-3">
+                                <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[var(--accent)] to-[#a855f7] flex items-center justify-center font-bold text-black text-xs border border-black overflow-hidden flex-shrink-0">
+                                  {comment.avatar ? <img src={comment.avatar} alt="Avatar" className="w-full h-full object-cover"/> : comment.displayName?.charAt(0) || "?"}
+                                </div>
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <span className="text-[12px] font-bold text-white">{comment.displayName || comment.username}</span>
+                                    <span className="text-[10px] text-[#666]">{new Date(comment.createdAt).toLocaleDateString()}</span>
+                                  </div>
+                                  <p className="text-[12px] text-[#ddd] leading-relaxed">{comment.text}</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-4 text-[#666]">
+                            <p className="text-[12px]">No comments yet</p>
+                          </div>
+                        )}
+                      </div>
                     )}
-
-                    <div className="pt-4 border-t border-[#222] flex items-center gap-6">
-                      <button className="flex items-center gap-2 text-[12px] text-[var(--text-muted)] hover:text-[#2ed573] transition-colors font-medium">
-                        <HiHandThumbUp size={14} aria-hidden="true" /> Helpful ({(review.likes || []).length})
-                      </button>
-                      <button className="text-[12px] text-[#666] hover:text-[#ff4757] transition-colors ml-auto">
-                        Report
-                      </button>
-                    </div>
                   </div>
                 ))}
 
