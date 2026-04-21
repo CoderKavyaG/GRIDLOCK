@@ -63,6 +63,16 @@ export default function WriteReviewModal({ game, onClose, onSuccess }) {
         updatedAt: new Date().toISOString()
       });
 
+      // 3. Auto-add game to shelf as "played" since they reviewed it
+      const shelfRef = doc(db, `gameShelf/${user.uid}/games/${game.id}`);
+      await setDoc(shelfRef, {
+        gameId: game.id,
+        gameName: game.name || "Game",
+        gameCover: game.cover || "",
+        status: "played",
+        addedAt: new Date().toISOString()
+      }, { merge: true });
+
       onSuccess(docRef.id);
       onClose();
     } catch (err) {

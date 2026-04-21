@@ -20,7 +20,6 @@ import SingleDebate from './pages/SingleDebate';
 import Settings from './pages/Settings';
 import UserProfile from './pages/UserProfile';
 import Rewind from './pages/Rewind';
-import Feed from './pages/Feed';
 import Leaderboard from './pages/Leaderboard';
 import Guidelines from './pages/Guidelines';
 import NotFound from './pages/NotFound';
@@ -93,7 +92,6 @@ function AppContent() {
 
           {/* Protected Routes */}
           <Route element={<ProtectedRoute />}>
-            <Route path="/feed" element={<Feed />} />
             <Route path="/profile" element={<MyProfile />} />
             <Route path="/shelf" element={<GameShelf />} />
             <Route path="/collections" element={<MyCollections />} />

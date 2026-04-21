@@ -11,7 +11,7 @@ import VerdictModal from "../components/VerdictModal";
 import WriteReviewModal from "../components/WriteReviewModal";
 import Lightbox from "../components/Lightbox";
 import EmptyState from "../components/EmptyState";
-import { FiBookmark, FiShare2, FiCalendar, FiBriefcase, FiClock, FiFlag, FiArrowRight } from "react-icons/fi";
+import { FiBookmark, FiShare2, FiCalendar, FiBriefcase, FiClock, FiFlag, FiArrowRight, FiX } from "react-icons/fi";
 import { HiHandThumbUp, HiHandThumbDown, HiMinus, HiSparkles } from "react-icons/hi2";
 import { BiJoystick } from "react-icons/bi";
 
@@ -35,6 +35,7 @@ export default function GameDetail() {
   
   const [showVerdictModal, setShowVerdictModal] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [trailerFullscreen, setTrailerFullscreen] = useState(false);
   
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -101,15 +102,27 @@ export default function GameDetail() {
         const fetchedReviews = [];
         const stats = { mustPlay: 0, goodEnough: 0, skipIt: 0, masterpiece: 0, total: 0 };
         
+        // First, count all votes from the votes collection
+        try {
+          const votesRef = collection(db, "votes");
+          const votesQuery = query(votesRef, where("gameId", "==", parseInt(gameId)));
+          const votesDocs = await getDocs(votesQuery);
+          
+          votesDocs.forEach(doc => {
+            const data = doc.data();
+            if (stats[data.verdict] !== undefined) {
+              stats[data.verdict]++;
+              stats.total++;
+            }
+          });
+        } catch (votesErr) {
+          console.warn("Failed to fetch votes:", votesErr);
+        }
+        
+        // Then collect reviews for display
         reviewDocs.forEach(doc => {
             const data = doc.data();
             fetchedReviews.push({ id: doc.id, ...data });
-            
-            // Count for dominant verdict (Simulated from reviews right now instead of reading global "votes" collection for speed)
-            if (stats[data.verdict] !== undefined) {
-               stats[data.verdict]++;
-               stats.total++;
-            }
         });
         
         setReviews(fetchedReviews);
@@ -128,13 +141,6 @@ export default function GameDetail() {
           const voteDoc = await getDoc(voteRef);
           if (voteDoc.exists()) {
               setUserVerdict(voteDoc.data().verdict);
-              
-              // Only add to stats if their vote wasn't already in the "reviews" list to avoid double counting
-              const userHasReview = fetchedReviews.some(r => r.uid === user.uid);
-              if (!userHasReview && stats[voteDoc.data().verdict] !== undefined) {
-                  stats[voteDoc.data().verdict]++;
-                  stats.total++;
-              }
           }
         }
         
@@ -214,21 +220,50 @@ export default function GameDetail() {
         url={`/game/${gameId}`}
       />
       
-      {/* TRAILER SECTION - ON TOP */}
+      {/* TRAILER BANNER - CLICKABLE FOR FULLSCREEN */}
       {trailer && trailer.data && trailer.data.max ? (
-        <div className="w-full aspect-video bg-black relative group">
-          <video 
-            src={trailer.data.max} 
-            controls
-            poster={trailer.preview || game.background_image}
-            className="w-full h-full object-cover"
-            autoPlay
-            muted
-          ></video>
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent pointer-events-none"></div>
-        </div>
+        <>
+          <div 
+            onClick={() => setTrailerFullscreen(true)}
+            className="w-full h-[280px] md:h-[320px] bg-black relative group cursor-pointer overflow-hidden"
+          >
+            <video 
+              src={trailer.data.max} 
+              poster={trailer.preview || game.background_image}
+              className="w-full h-full object-cover"
+              muted
+            ></video>
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent"></div>
+            <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/30 transition-colors">
+              <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center border-2 border-white/50">
+                <div className="w-0 h-0 border-l-8 border-r-0 border-t-5 border-b-5 border-l-white border-t-transparent border-b-transparent ml-1"></div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Fullscreen Trailer Modal */}
+          {trailerFullscreen && (
+            <div className="fixed inset-0 z-[200] bg-black flex items-center justify-center p-4">
+              <button
+                onClick={() => setTrailerFullscreen(false)}
+                className="absolute top-4 right-4 text-white hover:text-[var(--accent)] transition-colors z-[201] bg-black/50 p-2 rounded-full"
+              >
+                <FiX size={28} />
+              </button>
+              <div className="w-full h-screen max-h-screen bg-black relative">
+                <video 
+                  src={trailer.data.max} 
+                  poster={trailer.preview || game.background_image}
+                  className="w-full h-full object-contain"
+                  controls
+                  autoPlay
+                ></video>
+              </div>
+            </div>
+          )}
+        </>
       ) : (
-        <div className="w-full aspect-video bg-[#111] relative overflow-hidden">
+        <div className="w-full h-[280px] md:h-[320px] bg-[#111] relative overflow-hidden">
           <img 
             src={game.background_image} 
             alt={game.name}
