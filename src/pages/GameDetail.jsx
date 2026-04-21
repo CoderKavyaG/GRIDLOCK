@@ -31,6 +31,7 @@ export default function GameDetail() {
   const [userVerdict, setUserVerdict] = useState(null);
   const [userShelfStatus, setUserShelfStatus] = useState(null);
   const [reviews, setReviews] = useState([]);
+  const [verdictOnlyEntries, setVerdictOnlyEntries] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
   
   const [showVerdictModal, setShowVerdictModal] = useState(false);
@@ -100,9 +101,20 @@ export default function GameDetail() {
         const reviewDocs = await getDocs(q);
         
         const fetchedReviews = [];
+        const reviewUserIds = new Set();
         const stats = { mustPlay: 0, goodEnough: 0, skipIt: 0, masterpiece: 0, total: 0 };
         
-        // First, count all votes from the votes collection
+        // Collect user IDs from reviews for later comparison
+        reviewDocs.forEach(doc => {
+            const data = doc.data();
+            fetchedReviews.push({ id: doc.id, ...data });
+            if (data.uid) reviewUserIds.add(data.uid);
+        });
+        
+        setReviews(fetchedReviews);
+
+        // First, count all votes and create verdict-only entries
+        const verdictOnlyList = [];
         try {
           const votesRef = collection(db, "votes");
           const votesQuery = query(votesRef, where("gameId", "==", parseInt(gameId)));
@@ -114,18 +126,35 @@ export default function GameDetail() {
               stats[data.verdict]++;
               stats.total++;
             }
+            
+            // Check if this vote doesn't have a review
+            if (data.uid && !reviewUserIds.has(data.uid)) {
+              verdictOnlyList.push({
+                id: doc.id,
+                ...data,
+                isVerdictOnly: true,
+                createdAt: data.createdAt || new Date()
+              });
+            }
           });
+          
+          // Fetch user data for verdict-only entries
+          for (let entry of verdictOnlyList) {
+            try {
+              const userRef = doc(db, "users", entry.uid);
+              const userDoc = await getDoc(userRef);
+              if (userDoc.exists()) {
+                entry.userData = userDoc.data();
+              }
+            } catch (err) {
+              console.warn("Failed to fetch user data for verdict entry:", err);
+            }
+          }
+          
+          setVerdictOnlyEntries(verdictOnlyList);
         } catch (votesErr) {
           console.warn("Failed to fetch votes:", votesErr);
         }
-        
-        // Then collect reviews for display
-        reviewDocs.forEach(doc => {
-            const data = doc.data();
-            fetchedReviews.push({ id: doc.id, ...data });
-        });
-        
-        setReviews(fetchedReviews);
 
         // Fetch user specific data
         if (user) {
@@ -384,19 +413,32 @@ export default function GameDetail() {
               
               <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 md:gap-0 mb-4">
                 <div>
-                  <h2 className="font-syne text-[48px] md:text-[64px] font-black leading-none mb-2">
-                    {verdictStats.total > 0 ? Math.round((Math.max(verdictStats.mustPlay, verdictStats.goodEnough, verdictStats.skipIt, verdictStats.masterpiece) / verdictStats.total) * 100) : 0}%
-                  </h2>
-                  <h3 className="font-syne text-[24px] font-black leading-none">
-                    {dominantVerdict ? (
-                      <span style={{color: getVerdictMetadata(dominantVerdict).color}}>
-                        {getVerdictMetadata(dominantVerdict).label}
-                      </span>
-                    ) : "NOT ENOUGH VOTES"}
-                  </h3>
+                  {verdictStats.total > 0 ? (
+                    <>
+                      <h2 className="font-syne text-[28px] md:text-[40px] font-black leading-none mb-2">
+                        {Math.max(verdictStats.mustPlay, verdictStats.goodEnough, verdictStats.skipIt, verdictStats.masterpiece)}/{verdictStats.total}
+                      </h2>
+                      <h3 className="font-syne text-[20px] font-black leading-none">
+                        {dominantVerdict && (
+                          <span style={{color: getVerdictMetadata(dominantVerdict).color}}>
+                            {getVerdictMetadata(dominantVerdict).label}
+                          </span>
+                        )}
+                      </h3>
+                    </>
+                  ) : (
+                    <>
+                      <h2 className="font-syne text-[28px] md:text-[40px] font-black leading-none mb-2 text-[#666]">
+                        0/0
+                      </h2>
+                      <h3 className="font-syne text-[20px] font-black leading-none text-[#666]">
+                        NO VOTES YET
+                      </h3>
+                    </>
+                  )}
                 </div>
                 <p className="text-[14px] text-[var(--text-muted)]">
-                  Based on <span className="font-bold text-white">{verdictStats.total.toLocaleString()}</span> player votes
+                  Based on <span className="font-bold text-white">{verdictStats.total.toLocaleString()}</span> player {verdictStats.total === 1 ? 'vote' : 'votes'}
                 </p>
               </div>
             </div>
@@ -433,8 +475,8 @@ export default function GameDetail() {
                         ></div>
                       </div>
                     </div>
-                    <div className="text-right w-[50px] text-[13px] font-bold text-white">
-                      {percent}%
+                    <div className="text-right w-[60px] text-[13px] font-bold text-white">
+                      {count}/{verdictStats.total}
                     </div>
                     {isUserVote && (
                       <div className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-[var(--accent)] text-black">
@@ -473,7 +515,7 @@ export default function GameDetail() {
           <section id="reviews">
             <div className="flex items-center gap-4 mb-8">
               <h3 className="font-syne text-[28px] font-bold">Player Reviews</h3>
-              {reviews.length > 0 && <span className="bg-[#222] text-[var(--text-muted)] text-[12px] px-4 py-2 rounded-full font-bold">{reviews.length}</span>}
+              {(reviews.length + verdictOnlyEntries.length) > 0 && <span className="bg-[#222] text-[var(--text-muted)] text-[12px] px-4 py-2 rounded-full font-bold">{reviews.length + verdictOnlyEntries.length}</span>}
               <div className="h-px bg-[#222] flex-1"></div>
             </div>
 
@@ -481,7 +523,7 @@ export default function GameDetail() {
               <div className="space-y-4 animate-pulse">
                 {[1,2,3].map(i => <div key={i} className="h-40 bg-[#161616] rounded-xl border border-[#222]"></div>)}
               </div>
-            ) : reviews.length > 0 ? (
+            ) : reviews.length > 0 || verdictOnlyEntries.length > 0 ? (
               <div className="space-y-5">
                 {reviews.map(review => (
                   <div key={review.id} className="bg-[#161616] border border-[#222] rounded-[14px] p-6 transition-all hover:border-[#333] hover:bg-[#1a1a1a]">
@@ -522,6 +564,37 @@ export default function GameDetail() {
                     </div>
                   </div>
                 ))}
+
+                {/* VERDICT-ONLY ENTRIES */}
+                {verdictOnlyEntries.length > 0 && (
+                  <div className="mt-8 pt-8 border-t border-[#222]">
+                    <h4 className="text-[14px] font-bold text-[var(--text-muted)] mb-4 uppercase tracking-wider">Verdicts without reviews</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {verdictOnlyEntries.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).map(entry => (
+                        <div key={entry.id} className="bg-[#161616] border border-[#222] rounded-[12px] p-4 transition-all hover:border-[#333] hover:bg-[#1a1a1a]">
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[var(--accent)] to-[#a855f7] flex items-center justify-center font-bold text-black text-sm border-2 border-black object-cover overflow-hidden flex-shrink-0">
+                              {entry.userData?.avatar ? <img src={entry.userData.avatar} alt="Avatar" className="w-full h-full object-cover"/> : (entry.userData?.displayName || entry.username)?.charAt(0) || "?"}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="font-bold text-[13px] text-white truncate">{entry.userData?.displayName || entry.displayName || entry.username}</div>
+                              <div className="text-[var(--text-muted)] text-[11px]">{entry.createdAt ? new Date(entry.createdAt).toLocaleDateString() : 'Recently'}</div>
+                            </div>
+                          </div>
+                          
+                          <div className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider border inline-block`}
+                            style={{ 
+                              borderColor: `${getVerdictMetadata(entry.verdict).color}40`,
+                              backgroundColor: `${getVerdictMetadata(entry.verdict).color}15`,
+                              color: getVerdictMetadata(entry.verdict).color
+                            }}>
+                            {getVerdictMetadata(entry.verdict).label}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <EmptyState 
