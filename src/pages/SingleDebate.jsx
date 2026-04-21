@@ -18,6 +18,8 @@ export default function SingleDebate() {
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState("");
   const [submittingComment, setSubmittingComment] = useState(false);
+  const [replyingTo, setReplyingTo] = useState(null);
+  const [commentUpvotes, setCommentUpvotes] = useState({});
 
   useEffect(() => {
     fetchDebate();
@@ -117,8 +119,12 @@ export default function SingleDebate() {
                uid: user.uid,
                username: userProfile?.username || "Player",
                avatar: userProfile?.avatar || "",
+               displayName: userProfile?.displayName || "Player",
                text: commentText.trim(),
-               userVote: userVote || null, 
+               userVote: userVote || null,
+               replyTo: replyingTo,
+               upvotes: 0,
+               downvotes: 0,
                createdAt: new Date().toISOString(),
                likes: 0
            };
@@ -126,6 +132,7 @@ export default function SingleDebate() {
            const docRef = await addDoc(cRef, newComment);
            setComments([{ id: docRef.id, ...newComment }, ...comments]);
            setCommentText("");
+           setReplyingTo(null);
            addToast("Comment posted", "success");
        } catch (err) {
            console.error("Error posting comment:", err);
@@ -133,6 +140,19 @@ export default function SingleDebate() {
        } finally {
            setSubmittingComment(false);
        }
+  };
+
+  const handleUpvoteComment = (commentId) => {
+       if (!user) {
+           addToast("Sign in to upvote", "error");
+           return;
+       }
+       
+       // Optimistic update
+       const newUpvotes = { ...commentUpvotes };
+       newUpvotes[commentId] = (newUpvotes[commentId] || 0) + 1;
+       setCommentUpvotes(newUpvotes);
+       addToast("Upvoted", "success");
   };
 
   if (loading) {
@@ -244,6 +264,14 @@ export default function SingleDebate() {
 
              {/* COMMENT INPUT */}
              <div className="bg-[#161616] border border-[#2a2a2a] rounded-2xl p-6 mb-12 shadow-lg relative">
+                 {replyingTo && (
+                     <div className="mb-4 pb-4 border-b border-[#2a2a2a]">
+                         <div className="flex items-center justify-between">
+                             <p className="text-[12px] text-[var(--text-muted)] font-bold uppercase tracking-wider">Replying to comment</p>
+                             <button onClick={() => setReplyingTo(null)} className="text-[var(--accent)] hover:text-white font-bold text-[12px]">Clear</button>
+                         </div>
+                     </div>
+                 )}
                  {user ? (
                      <>
                          {userVote && (
@@ -263,16 +291,24 @@ export default function SingleDebate() {
                                    <textarea 
                                        value={commentText}
                                        onChange={(e) => setCommentText(e.target.value)}
-                                       placeholder={userVote ? "Share your take on why you voted this way..." : "Cast a vote above, then share your take..."}
+                                       placeholder={userVote ? `${replyingTo ? "Write your reply..." : "Share your take on why you voted this way..."}` : "Cast a vote above, then share your take..."}
                                        className="w-full bg-[#111] border border-[#2a2a2a] rounded-xl p-4 text-[15px] focus:outline-none focus:border-[var(--accent)] transition-all min-h-[100px] resize-y mb-4 placeholder:text-[#555]"
                                    ></textarea>
-                                   <div className="flex justify-end">
+                                   <div className="flex justify-end gap-3">
+                                        {replyingTo && (
+                                            <button 
+                                                onClick={() => setReplyingTo(null)}
+                                                className="px-4 h-10 bg-[#111] text-white font-bold rounded-lg border border-[#2a2a2a] hover:border-[#444] transition-all"
+                                            >
+                                                Cancel
+                                            </button>
+                                        )}
                                         <button 
                                             onClick={handlePostComment}
                                             disabled={submittingComment || !commentText.trim() || !userVote}
                                             className="px-6 h-10 bg-[var(--accent)] text-black font-syne font-bold rounded-lg transition-all hover:brightness-105 disabled:opacity-50 flex items-center gap-2"
                                         >
-                                            {submittingComment ? "Posting..." : "Post Comment →"}
+                                            {submittingComment ? "Posting..." : `${replyingTo ? "Reply →" : "Post Comment →"}`}
                                         </button>
                                    </div>
                                    {!userVote && <p className="text-[12px] text-[#ff4757] text-right mt-2">You must vote before commenting.</p>}
@@ -292,29 +328,48 @@ export default function SingleDebate() {
                   {comments.length > 0 ? comments.map(c => (
                        <div key={c.id} className="group">
                            <div className="flex gap-4 items-start">
-                               <div className="w-10 h-10 rounded-full bg-[#222] shrink-0 overflow-hidden border border-[#333]">
-                                   {c.avatar ? <img src={c.avatar} alt="" className="w-full h-full object-cover" /> : null}
+                               <div className="flex flex-col items-center gap-1">
+                                   <div className="w-10 h-10 rounded-full bg-[#222] shrink-0 overflow-hidden border border-[#333]">
+                                       {c.avatar ? <img src={c.avatar} alt="" className="w-full h-full object-cover" /> : null}
+                                   </div>
                                </div>
-                               <div className="flex-1 bg-[#161616] p-5 rounded-2xl rounded-tl-sm border border-[#222] group-hover:border-[#333] transition-colors relative">
-                                    <div className="flex items-center gap-3 mb-2">
-                                        <Link to={`/user/${c.username}`} className="font-bold text-[14px] hover:text-[var(--accent)] transition-colors">@{c.username}</Link>
-                                        <span className="text-[11px] text-[#666] font-medium">{new Date(c.createdAt).toLocaleDateString()}</span>
-                                        {c.userVote && (
-                                            <span className={`ml-auto px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest border ${
-                                                c.userVote === 'agree' ? 'bg-[#2ed573]/10 border-[#2ed573]/30 text-[#2ed573]' : 'bg-[#ff4757]/10 border-[#ff4757]/30 text-[#ff4757]'
-                                            }`}>
-                                                {c.userVote}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <p className="text-[14px] text-[#ddd] leading-relaxed mb-4 whitespace-pre-wrap">{c.text}</p>
-                                    <div className="flex items-center gap-6">
-                                         <button className="flex items-center gap-2 text-[12px] font-bold text-[#666] hover:text-[#2ed573] transition-colors">
-                                             <FaThumbsUp size={12}/> {c.likes || 0}
-                                         </button>
-                                         <button className="text-[12px] font-bold text-[#666] hover:text-white transition-colors">Reply</button>
-                                         <button className="text-[12px] font-medium text-[#444] hover:text-[#ff4757] transition-colors ml-auto opacity-0 group-hover:opacity-100">Report</button>
-                                    </div>
+                               <div className="flex-1">
+                                   <div className="bg-[#161616] p-5 rounded-2xl rounded-tl-sm border border-[#222] group-hover:border-[#333] transition-colors">
+                                        <div className="flex items-center gap-3 mb-2 flex-wrap">
+                                            <Link to={`/user/${c.username}`} className="font-bold text-[14px] hover:text-[var(--accent)] transition-colors">
+                                                {c.displayName || c.username}
+                                            </Link>
+                                            <span className="text-[#666] text-[12px]">@{c.username}</span>
+                                            <span className="text-[11px] text-[#666] font-medium">{new Date(c.createdAt).toLocaleDateString()}</span>
+                                            {c.userVote && (
+                                                <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest border ${
+                                                    c.userVote === 'agree' ? 'bg-[#2ed573]/10 border-[#2ed573]/30 text-[#2ed573]' : 'bg-[#ff4757]/10 border-[#ff4757]/30 text-[#ff4757]'
+                                                }`}>
+                                                    {c.userVote}
+                                                </span>
+                                            )}
+                                        </div>
+                                        {c.replyTo && <p className="text-[11px] text-[#666] mb-2">Replying to another comment</p>}
+                                        <p className="text-[14px] text-[#ddd] leading-relaxed mb-4 whitespace-pre-wrap">{c.text}</p>
+                                        <div className="flex items-center gap-4 flex-wrap">
+                                             <div className="flex items-center gap-2 bg-[#111] px-3 py-1.5 rounded-lg">
+                                                 <button 
+                                                    onClick={() => handleUpvoteComment(c.id)}
+                                                    className="text-[#666] hover:text-[#2ed573] transition-colors flex items-center gap-1.5 text-[12px] font-bold"
+                                                 >
+                                                     <span className="text-[14px]">↑</span> {(commentUpvotes[c.id] || 0) + (c.upvotes || 0)}
+                                                 </button>
+                                                 <div className="w-px h-4 bg-[#333]"></div>
+                                                 <button className="text-[#666] hover:text-[#ff4757] transition-colors flex items-center gap-1.5 text-[12px] font-bold">
+                                                     <span className="text-[14px]">↓</span> {c.downvotes || 0}
+                                                 </button>
+                                             </div>
+                                             <button 
+                                                onClick={() => setReplyingTo(c.id)}
+                                                className="text-[12px] font-bold text-[#666] hover:text-white transition-colors">Reply</button>
+                                             <button className="text-[12px] font-medium text-[#444] hover:text-[#ff4757] transition-colors ml-auto opacity-0 group-hover:opacity-100">Report</button>
+                                        </div>
+                                   </div>
                                </div>
                            </div>
                        </div>
