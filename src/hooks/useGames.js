@@ -20,7 +20,7 @@ const setCachedData = (url, data) => {
 };
 
 export const useGames = (endpointFn, dependency = null, useMockOnError = true) => {
-    const [data, setData] = useState([]);
+    const [data, setData] = useState([]); // Start with empty array, never null
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isUsingMockData, setIsUsingMockData] = useState(false);
@@ -37,7 +37,8 @@ export const useGames = (endpointFn, dependency = null, useMockOnError = true) =
                 const cachedData = getCachedData(url);
                 if (cachedData) {
                     if (isMounted) {
-                        setData(cachedData);
+                        const dataArray = Array.isArray(cachedData) ? cachedData : [];
+                        setData(dataArray);
                         setError(null);
                         setIsUsingMockData(false);
                         setLoading(false);
@@ -47,9 +48,12 @@ export const useGames = (endpointFn, dependency = null, useMockOnError = true) =
                 
                 const response = await axios.get(url, { timeout: 8000 });
                 if (isMounted) {
-                    const result = response.data?.results || response.data || [];
-                    setData(result);
-                    setCachedData(url, result);
+                    // Safely extract results from response
+                    const result = response?.data?.results || response?.data || [];
+                    // Ensure result is always an array
+                    const dataArray = Array.isArray(result) ? result : (Array.isArray(result?.results) ? result.results : []);
+                    setData(dataArray || []);
+                    setCachedData(url, dataArray || []);
                     setError(null);
                     setIsUsingMockData(false);
                 }
@@ -62,11 +66,25 @@ export const useGames = (endpointFn, dependency = null, useMockOnError = true) =
                     if (fnStr.includes('mood')) mockType = 'moodGames';
                     
                     if (useMockOnError) {
-                        const mockData = mockGames[mockType];
-                        setData(Array.isArray(mockData) ? mockData : Object.values(mockData));
-                        setError(null);
-                        setIsUsingMockData(true);
-                        console.warn(`[DEV MODE] Using mock data for ${mockType}`);
+                        try {
+                            const mockData = mockGames[mockType];
+                            if (!mockData) {
+                                console.warn(`No mock data available for ${mockType}, using topRated fallback`);
+                                const fallbackData = mockGames['topRated'] || [];
+                                setData(Array.isArray(fallbackData) ? fallbackData : Object.values(fallbackData) || []);
+                            } else {
+                                const dataArray = Array.isArray(mockData) ? mockData : (Object.values(mockData) || []);
+                                setData(Array.isArray(dataArray) ? dataArray : []);
+                            }
+                            setError(null);
+                            setIsUsingMockData(true);
+                            console.warn(`[DEV MODE] Using mock data for ${mockType}`);
+                        } catch (mockErr) {
+                            console.error('Failed to load mock data:', mockErr);
+                            setData([]);
+                            setError('Failed to load games');
+                            setIsUsingMockData(false);
+                        }
                     } else {
                         setData([]);
                         setError(err.response?.data?.error || err.message || 'Failed to load games');
@@ -89,5 +107,6 @@ export const useGames = (endpointFn, dependency = null, useMockOnError = true) =
         };
     }, [endpointFn, dependency, useMockOnError]);
 
-    return { data: data || [], loading, error, isUsingMockData };
+    // Always return data as array, never null or undefined
+    return { data: Array.isArray(data) ? data : [], loading, error, isUsingMockData };
 };

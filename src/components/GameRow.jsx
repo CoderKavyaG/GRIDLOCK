@@ -67,12 +67,14 @@ export const GameRow = ({ title, chipLabel, chipColor, games, loading, error, se
                         Array.from({ length: 8 }).map((_, i) => (
                             <SkeletonCard key={i} />
                         ))
-                    ) : (
-                        games?.map((game, i) => (
+                    ) : (games && Array.isArray(games) && games.length > 0) ? (
+                        games.map((game, i) => (
                             <motion.div key={game.id} variants={itemVariants}>
                                 <GameCard game={game} rank={showRank ? i + 1 : undefined} />
                             </motion.div>
                         ))
+                    ) : (
+                        <div className="text-[14px] text-text-muted">No games to display.</div>
                     )}
                 </motion.div>
             )}

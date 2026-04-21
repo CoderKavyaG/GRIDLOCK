@@ -19,7 +19,7 @@ export const EditorialHero = () => {
         );
     }
 
-    if (error || !topGames || topGames.length < 4) {
+    if (error || !topGames || !Array.isArray(topGames) || topGames.length < 4) {
         return (
             <div className="w-full h-[85vh] bg-[#0a0a0a] flex items-center justify-center p-4">
                 <div className="text-center max-w-md">
