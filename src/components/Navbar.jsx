@@ -20,12 +20,11 @@ export const Navbar = () => {
 
     const navLinks = [
         { name: 'Discover', path: '/' },
-        { name: 'Leaderboard', path: '/leaderboard' },
-        { name: 'Debates', path: '/debates' }
+        { name: 'Debates', path: '/debates' },
+        { name: 'Leaderboard', path: '/leaderboard' }
     ];
 
     if (user) {
-        navLinks.splice(1, 0, { name: 'Feed', path: '/feed' }); // Insert after Discover
         navLinks.push({ name: 'Collections', path: '/collections' });
         navLinks.push({ name: 'Shelf', path: '/shelf' });
     }

@@ -1,76 +1,131 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { db } from "../firebase/firebase";
-import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
+import { collection, query, where, orderBy, getDocs, addDoc } from "firebase/firestore";
+import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import EmptyState from "../components/EmptyState";
 import SEO from "../components/SEO";
-import { FiClock, FiThumbsUp, FiThumbsDown, FiArrowRight } from "react-icons/fi";
+import { FiClock, FiThumbsUp, FiThumbsDown, FiArrowRight, FiX } from "react-icons/fi";
 import { FaFire } from "react-icons/fa";
 import { BiMessageSquareDetail } from "react-icons/bi";
 
 export default function Debates() {
+  const { user, userProfile } = useAuth();
+  const { addToast } = useToast();
   const [debates, setDebates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("hot"); // hot | new
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    title: "",
+    statement: "",
+    gameName: "",
+    gameId: null
+  });
+
+  const fetchDebates = async () => {
+    setLoading(true);
+    try {
+      const dRef = collection(db, "debates");
+      const orderField = activeTab === 'hot' ? 'agreeCount' : 'createdAt'; 
+      // Only fetch approved debates
+      const q = query(
+        dRef, 
+        where("approved", "==", true),
+        orderBy(orderField, "desc")
+      ); 
+      
+      const snapshot = await getDocs(q);
+      const list = [];
+      snapshot.forEach(doc => {
+          list.push({ id: doc.id, ...doc.data() });
+      });
+      
+      // Mock data if empty for demo purposes
+      if (list.length === 0) {
+           const mock1 = {
+               id: "demo_1",
+               title: "Is difficulty an accessibility issue?",
+               statement: "Games like Elden Ring should have easy modes for accessibility.",
+               gameId: 58134,
+               gameName: "Elden Ring",
+               gameCover: "https://media.rawg.io/media/games/5ec/5ecac5cb026ec26a56efdf5ac6f6cf56.jpg",
+               agreeCount: 342,
+               disagreeCount: 1205,
+               createdAt: new Date().toISOString(),
+               approved: true
+           };
+           const mock2 = {
+               id: "demo_2",
+               title: "Remakes vs Original Vision",
+               statement: "The Last of Us Part 1 remake was entirely unnecessary.",
+               gameId: 28,
+               gameName: "The Last of Us",
+               gameCover: "https://media.rawg.io/media/games/b29/b294fdd866dcdb643e7bab370a552855.jpg",
+               agreeCount: 890,
+               disagreeCount: 885,
+               createdAt: new Date().toISOString(),
+               approved: true
+           };
+           setDebates([mock1, mock2]);
+      } else {
+           setDebates(list);
+      }
+    } catch (err) {
+        console.error("Error fetching debates:", err);
+    } finally {
+        setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchDebates = async () => {
-      setLoading(true);
-      try {
-        const dRef = collection(db, "debates");
-        const orderField = activeTab === 'hot' ? 'agreeCount' : 'createdAt'; 
-        // Only fetch approved debates
-        const q = query(
-          dRef, 
-          where("approved", "==", true),
-          orderBy(orderField, "desc")
-        ); 
-        
-        const snapshot = await getDocs(q);
-        const list = [];
-        snapshot.forEach(doc => {
-            list.push({ id: doc.id, ...doc.data() });
-        });
-        
-        // Mock data if empty for demo purposes
-        if (list.length === 0) {
-             const mock1 = {
-                 id: "demo_1",
-                 title: "Is difficulty an accessibility issue?",
-                 statement: "Games like Elden Ring should have easy modes for accessibility.",
-                 gameId: 58134,
-                 gameName: "Elden Ring",
-                 gameCover: "https://media.rawg.io/media/games/5ec/5ecac5cb026ec26a56efdf5ac6f6cf56.jpg",
-                 agreeCount: 342,
-                 disagreeCount: 1205,
-                 createdAt: new Date().toISOString(),
-                 approved: true
-             };
-             const mock2 = {
-                 id: "demo_2",
-                 title: "Remakes vs Original Vision",
-                 statement: "The Last of Us Part 1 remake was entirely unnecessary.",
-                 gameId: 28,
-                 gameName: "The Last of Us",
-                 gameCover: "https://media.rawg.io/media/games/b29/b294fdd866dcdb643e7bab370a552855.jpg",
-                 agreeCount: 890,
-                 disagreeCount: 885,
-                 createdAt: new Date().toISOString(),
-                 approved: true
-             };
-             setDebates([mock1, mock2]);
-        } else {
-             setDebates(list);
-        }
-      } catch (err) {
-          console.error("Error fetching debates:", err);
-      } finally {
-          setLoading(false);
-      }
-    };
-    
     fetchDebates();
   }, [activeTab]);
+
+  const handleCreateDebate = async () => {
+    if (!user) {
+      addToast("Sign in to create a debate", "error");
+      return;
+    }
+
+    if (!formData.title.trim() || !formData.statement.trim()) {
+      addToast("Please fill in all fields", "error");
+      return;
+    }
+
+    setCreateLoading(true);
+    try {
+      const debatesRef = collection(db, "debates");
+      const newDebate = {
+        title: formData.title,
+        statement: formData.statement,
+        gameName: formData.gameName || "General",
+        gameId: formData.gameId || null,
+        gameCover: "https://via.placeholder.com/300x400?text=Gaming+Debate",
+        creatorId: user.uid,
+        creatorName: userProfile?.displayName || userProfile?.username || "Player",
+        creatorAvatar: userProfile?.avatar || "",
+        agreeCount: 0,
+        disagreeCount: 0,
+        approved: false,
+        createdAt: new Date().toISOString()
+      };
+
+      await addDoc(debatesRef, newDebate);
+      addToast("Debate created! Awaiting admin approval", "success");
+      setFormData({ title: "", statement: "", gameName: "", gameId: null });
+      setShowCreateModal(false);
+      // Refresh debates
+      await fetchDebates();
+    } catch (err) {
+      console.error("Error creating debate:", err);
+      addToast("Failed to create debate", "error");
+    } finally {
+      setCreateLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white pt-[72px]">
@@ -86,7 +141,7 @@ export default function Debates() {
                      The internet has opinions. What are yours?
                  </p>
                  
-                 <div className="flex justify-center gap-2 mt-8">
+                 <div className="flex flex-col md:flex-row justify-center gap-2 mt-8">
                      <button
                          onClick={() => setActiveTab('hot')}
                          className={`h-12 px-8 rounded-full font-bold text-[14px] transition-all flex items-center gap-2 ${activeTab === 'hot' ? 'bg-[var(--accent)] text-black' : 'bg-[#161616] text-[#888] border border-[#2a2a2a] hover:text-white'}`}
@@ -98,6 +153,12 @@ export default function Debates() {
                          className={`h-12 px-8 rounded-full font-bold text-[14px] transition-all flex items-center gap-2 ${activeTab === 'new' ? 'bg-[var(--accent)] text-black' : 'bg-[#161616] text-[#888] border border-[#2a2a2a] hover:text-white'}`}
                      >
                          <FiClock /> Recent
+                     </button>
+                     <button
+                         onClick={() => user ? setShowCreateModal(true) : addToast("Sign in to create debate", "error")}
+                         className="h-12 px-8 rounded-full font-bold text-[14px] transition-all flex items-center gap-2 bg-[var(--accent)] text-black hover:brightness-110"
+                     >
+                         + Start Debate
                      </button>
                  </div>
             </div>
@@ -158,6 +219,77 @@ export default function Debates() {
                  </div>
              ) : (
                  <EmptyState icon={<BiMessageSquareDetail size={48} />} title="Silence in the arena" subtitle="No active debates found. Start a conversation or check back later." />
+             )}
+
+             {/* CREATE DEBATE MODAL */}
+             {showCreateModal && (
+               <div className="fixed inset-0 z-[200] bg-black/80 flex items-center justify-center p-4">
+                 <div className="bg-[#161616] border border-[#222] rounded-2xl max-w-[600px] w-full max-h-[90vh] overflow-auto">
+                   <div className="sticky top-0 flex items-center justify-between p-6 border-b border-[#222] bg-[#161616]">
+                     <h2 className="font-syne text-[24px] font-bold">Start a Debate</h2>
+                     <button 
+                       onClick={() => setShowCreateModal(false)}
+                       className="text-[#666] hover:text-white transition-colors"
+                     >
+                       <FiX size={24} />
+                     </button>
+                   </div>
+
+                   <div className="p-6 space-y-6">
+                     {/* Title */}
+                     <div>
+                       <label className="block text-[12px] font-bold uppercase tracking-wider text-[#666] mb-2">Debate Title (Optional)</label>
+                       <input 
+                         type="text"
+                         placeholder="e.g., Difficulty vs Accessibility"
+                         value={formData.title}
+                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                         className="w-full bg-[#111] border border-[#2a2a2a] rounded-lg p-3 text-white placeholder:text-[#555] focus:outline-none focus:border-[var(--accent)] transition-all"
+                       />
+                     </div>
+
+                     {/* Statement */}
+                     <div>
+                       <label className="block text-[12px] font-bold uppercase tracking-wider text-[#666] mb-2">Your Statement *</label>
+                       <textarea 
+                         placeholder="What's the gaming opinion you want to debate?"
+                         value={formData.statement}
+                         onChange={(e) => setFormData({ ...formData, statement: e.target.value })}
+                         className="w-full bg-[#111] border border-[#2a2a2a] rounded-lg p-3 text-white placeholder:text-[#555] focus:outline-none focus:border-[var(--accent)] transition-all resize-none min-h-[120px]"
+                       />
+                     </div>
+
+                     {/* Game Name */}
+                     <div>
+                       <label className="block text-[12px] font-bold uppercase tracking-wider text-[#666] mb-2">Game (Optional)</label>
+                       <input 
+                         type="text"
+                         placeholder="e.g., Elden Ring"
+                         value={formData.gameName}
+                         onChange={(e) => setFormData({ ...formData, gameName: e.target.value })}
+                         className="w-full bg-[#111] border border-[#2a2a2a] rounded-lg p-3 text-white placeholder:text-[#555] focus:outline-none focus:border-[var(--accent)] transition-all"
+                       />
+                     </div>
+
+                     {/* Actions */}
+                     <div className="flex gap-3 pt-4 border-t border-[#222]">
+                       <button 
+                         onClick={() => setShowCreateModal(false)}
+                         className="flex-1 h-12 bg-[#111] border border-[#2a2a2a] rounded-lg font-bold hover:bg-[#1a1a1a] transition-colors"
+                       >
+                         Cancel
+                       </button>
+                       <button 
+                         onClick={handleCreateDebate}
+                         disabled={createLoading}
+                         className="flex-1 h-12 bg-[var(--accent)] text-black rounded-lg font-bold hover:brightness-110 disabled:opacity-50 transition-all"
+                       >
+                         {createLoading ? "Creating..." : "Create Debate"}
+                       </button>
+                     </div>
+                   </div>
+                 </div>
+               </div>
              )}
         </div>
     </div>

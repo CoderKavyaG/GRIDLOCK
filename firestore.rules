@@ -13,26 +13,42 @@ service cloud.firestore {
     // Reviews collection - with approval workflow
     match /reviews/{reviewId} {
       allow read: if resource.data.approved == true || request.auth != null && request.auth.token.get('role') == 'admin';
-      allow create: if request.auth != null && request.resource.data.approved == false;
+      allow create: if request.auth != null;
       allow update: if (request.auth != null && request.auth.uid == resource.data.uid && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['approved'])) ||
                        (request.auth != null && request.auth.token.get('role') == 'admin');
       allow delete: if request.auth != null && (request.auth.uid == resource.data.uid || request.auth.token.get('role') == 'admin');
+      
+      // Comments subcollection
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if request.auth != null;
+        allow update, delete: if request.auth != null && request.auth.uid == resource.data.uid;
+      }
     }
 
     // Debates collection - with approval workflow
     match /debates/{debateId} {
-      allow read: if resource.data.approved == true || request.auth != null && request.auth.token.get('role') == 'admin';
-      allow create: if request.auth != null && request.resource.data.approved == false;
+      allow read: if resource.data.approved == true || 
+                     (request.auth != null && request.auth.uid == resource.data.creatorId) ||
+                     (request.auth != null && request.auth.token.get('role') == 'admin');
+      allow create: if request.auth != null;
       allow update: if (request.auth != null && request.auth.uid == resource.data.creatorId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['approved'])) ||
                        (request.auth != null && request.auth.token.get('role') == 'admin');
       allow delete: if request.auth != null && (request.auth.uid == resource.data.creatorId || request.auth.token.get('role') == 'admin');
+      
+      // Comments subcollection
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if request.auth != null;
+        allow update, delete: if request.auth != null && request.auth.uid == resource.data.uid;
+      }
     }
 
     // Collections collection
     match /collections/{collectionId} {
       allow read: if true;
       allow create: if request.auth != null;
-      allow update, delete: if request.auth != null && request.auth.uid == resource.data.creatorId;
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.uid;
     }
 
     // Follows collection
