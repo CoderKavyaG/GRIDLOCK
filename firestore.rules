@@ -12,7 +12,9 @@ service cloud.firestore {
 
     // Reviews collection - with approval workflow
     match /reviews/{reviewId} {
-      allow read: if resource.data.approved == true || request.auth != null && request.auth.token.get('role') == 'admin';
+      allow read: if (resource.data.approved == true) || 
+                     (request.auth != null && request.auth.uid == resource.data.uid) ||
+                     (request.auth != null && request.auth.token.get('role') == 'admin');
       allow create: if request.auth != null;
       allow update: if (request.auth != null && request.auth.uid == resource.data.uid && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['approved'])) ||
                        (request.auth != null && request.auth.token.get('role') == 'admin');
@@ -89,9 +91,14 @@ service cloud.firestore {
     }
 
     // Game shelf
-    match /gameShelf/{userId}/games/{gameId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow create, update, delete: if request.auth != null && request.auth.uid == userId;
+    match /gameShelf/{userId} {
+      allow read: if true;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      
+      match /games/{gameId} {
+        allow read: if true;
+        allow create, update, delete: if request.auth != null && request.auth.uid == userId;
+      }
     }
 
     // Default deny
