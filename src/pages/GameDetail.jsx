@@ -457,6 +457,7 @@ export default function GameDetail() {
             dominantVerdict={dominantVerdict}
             userVerdict={userVerdict}
             onVoteSuccess={() => refetchFirebaseData()}
+            onShelfStatusChange={() => refetchFirebaseData()}
           />
 
           {/* TRAILER ALTERNATIVE (if screenshots show) */}

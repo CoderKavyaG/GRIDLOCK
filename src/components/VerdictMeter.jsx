@@ -1,15 +1,20 @@
 import { useState } from "react";
 import { HiSparkles, HiHandThumbUp, HiMinus, HiHandThumbDown } from "react-icons/hi2";
+import { FaPlay, FaClock, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 
-export default function VerdictMeter({ game, verdictStats, dominantVerdict, userVerdict, onVoteSuccess }) {
+export default function VerdictMeter({ game, verdictStats, dominantVerdict, userVerdict, onVoteSuccess, onShelfStatusChange }) {
   const { user } = useAuth();
   const { addToast } = useToast();
   const [votingVerdict, setVotingVerdict] = useState(null);
   const [submittingVote, setSubmittingVote] = useState(false);
+  const [localVerdictStats, setLocalVerdictStats] = useState(verdictStats);
+  const [localUserVerdict, setLocalUserVerdict] = useState(userVerdict);
+  const [localDominantVerdict, setLocalDominantVerdict] = useState(dominantVerdict);
+  const [submittingShelfStatus, setSubmittingShelfStatus] = useState(null);
   const verdictConfig = [
     { id: 'masterpiece', label: "Perfection", color: "#a855f7", icon: HiSparkles },
     { id: 'mustPlay', label: "Go for it", color: "#2ed573", icon: HiHandThumbUp },
@@ -27,6 +32,34 @@ export default function VerdictMeter({ game, verdictStats, dominantVerdict, user
     setVotingVerdict(verdictId);
 
     try {
+      // Update local state immediately for instant UI feedback
+      const updatedStats = { ...localVerdictStats };
+      
+      // Decrease count of old verdict if user had one
+      if (localUserVerdict && updatedStats[localUserVerdict] > 0) {
+        updatedStats[localUserVerdict]--;
+      }
+      
+      // Increase count of new verdict
+      updatedStats[verdictId] = (updatedStats[verdictId] || 0) + 1;
+      updatedStats.total = (updatedStats.total || 0) + (localUserVerdict ? 0 : 1);
+      
+      // Calculate new dominant verdict
+      let maxVerdict = null;
+      let maxCount = 0;
+      for (const [key, val] of Object.entries(updatedStats)) {
+        if (key !== 'total' && val > maxCount) {
+          maxCount = val;
+          maxVerdict = key;
+        }
+      }
+      
+      // Update local state
+      setLocalVerdictStats(updatedStats);
+      setLocalUserVerdict(verdictId);
+      setLocalDominantVerdict(maxVerdict);
+
+      // Save to Firebase
       const voteRef = doc(db, "votes", `${user.uid}_${game.id}`);
       await setDoc(voteRef, {
         uid: user.uid,
@@ -41,6 +74,10 @@ export default function VerdictMeter({ game, verdictStats, dominantVerdict, user
       }
     } catch (err) {
       console.error("Error casting verdict:", err);
+      // Revert local state on error
+      setLocalVerdictStats(verdictStats);
+      setLocalUserVerdict(userVerdict);
+      setLocalDominantVerdict(dominantVerdict);
       addToast("Failed to save verdict", "error");
     } finally {
       setSubmittingVote(false);
@@ -48,7 +85,37 @@ export default function VerdictMeter({ game, verdictStats, dominantVerdict, user
     }
   };
 
-  const total = verdictStats.total || 0;
+  const handleShelfStatus = async (status) => {
+    if (!user) {
+      addToast("Sign in to add to shelf", "error");
+      return;
+    }
+
+    setSubmittingShelfStatus(status);
+
+    try {
+      const shelfRef = doc(db, `gameShelf/${user.uid}/games/${game.id}`);
+      await setDoc(shelfRef, {
+        gameId: game.id,
+        gameName: game.name || "Game",
+        gameCover: game.cover || "",
+        status: status,
+        addedAt: new Date().toISOString()
+      }, { merge: true });
+
+      addToast(`Added to shelf as "${status}"`, "success");
+      if (onShelfStatusChange) {
+        onShelfStatusChange(status);
+      }
+    } catch (err) {
+      console.error("Error updating shelf:", err);
+      addToast("Failed to update shelf", "error");
+    } finally {
+      setSubmittingShelfStatus(null);
+    }
+  };
+
+  const total = localVerdictStats.total || 0;
   
   // Calculate angles for semicircle (180 degrees = half circle)
   const getAngle = (count) => {
@@ -89,7 +156,7 @@ export default function VerdictMeter({ game, verdictStats, dominantVerdict, user
   // Calculate all slice paths
   let currentAngle = 0;
   const slices = verdictConfig.map((verdict) => {
-    const count = verdictStats[verdict.id] || 0;
+    const count = localVerdictStats[verdict.id] || 0;
     const angle = getAngle(count);
     const startAngle = currentAngle;
     const endAngle = currentAngle + angle;
@@ -162,7 +229,7 @@ export default function VerdictMeter({ game, verdictStats, dominantVerdict, user
                     fill="white"
                     fontFamily="monospace"
                   >
-                    {dominantVerdict ? slices.find(s => s.id === dominantVerdict)?.count : 0}/{total}
+                    {localDominantVerdict ? slices.find(s => s.id === localDominantVerdict)?.count : 0}/{total}
                   </text>
                 </svg>
               ) : (
@@ -179,9 +246,9 @@ export default function VerdictMeter({ game, verdictStats, dominantVerdict, user
           <div className="flex flex-col justify-center">
             <div className="mb-8">
               <h3 className="font-syne text-[20px] font-black leading-none mb-2">
-                {dominantVerdict ? (
-                  <span style={{color: slices.find(s => s.id === dominantVerdict)?.color}}>
-                    {slices.find(s => s.id === dominantVerdict)?.label}
+                {localDominantVerdict ? (
+                  <span style={{color: slices.find(s => s.id === localDominantVerdict)?.color}}>
+                    {slices.find(s => s.id === localDominantVerdict)?.label}
                   </span>
                 ) : "No Consensus"}
               </h3>
@@ -211,7 +278,7 @@ export default function VerdictMeter({ game, verdictStats, dominantVerdict, user
       <div className="space-y-3">
         {verdictConfig.map(v => {
           const slice = slices.find(s => s.id === v.id);
-          const isUserVote = userVerdict === v.id;
+          const isUserVote = localUserVerdict === v.id;
           return (
             <button
               key={v.id}
@@ -251,6 +318,34 @@ export default function VerdictMeter({ game, verdictStats, dominantVerdict, user
             </button>
           );
         })}
+      </div>
+
+      {/* Shelf Status Buttons */}
+      <div className="mt-8 pt-8 border-t border-[#1e1e1e]">
+        <p className="text-[11px] uppercase tracking-widest text-[var(--text-muted)] font-bold mb-4">
+          Add to My Shelf
+        </p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[
+            { id: 'playing', label: 'Playing', icon: FaPlay },
+            { id: 'wantToPlay', label: 'Want to Play', icon: FaClock },
+            { id: 'played', label: 'Played', icon: FaCheckCircle },
+            { id: 'dropped', label: 'Dropped', icon: FaTimesCircle }
+          ].map(status => (
+            <button
+              key={status.id}
+              onClick={() => handleShelfStatus(status.id)}
+              disabled={submittingShelfStatus !== null}
+              className="flex items-center justify-center gap-2 p-3 rounded-lg border border-[#222] hover:border-[var(--accent)] hover:bg-[var(--accent)]/5 transition-all cursor-pointer disabled:opacity-50 text-[13px] font-medium"
+            >
+              <status.icon size={16} />
+              <span className="text-white">{status.label}</span>
+              {submittingShelfStatus === status.id && (
+                <div className="w-3 h-3 border-2 border-[var(--accent)]/20 border-t-[var(--accent)] rounded-full animate-spin ml-1"></div>
+              )}
+            </button>
+          ))}
+        </div>
       </div>
     </section>
   );
