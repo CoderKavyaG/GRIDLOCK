@@ -9,15 +9,16 @@ import SEO from "../components/SEO";
 import AddToShelfButton from "../components/AddToShelfButton";
 import VerdictModal from "../components/VerdictModal";
 import WriteReviewModal from "../components/WriteReviewModal";
+import VerdictMeter from "../components/VerdictMeter";
 import Lightbox from "../components/Lightbox";
 import EmptyState from "../components/EmptyState";
-import { FiBookmark, FiShare2, FiCalendar, FiBriefcase, FiClock, FiFlag, FiArrowRight, FiX } from "react-icons/fi";
-import { HiHandThumbUp, HiHandThumbDown, HiMinus, HiSparkles } from "react-icons/hi2";
+import { FiShare2, FiCalendar, FiBriefcase, FiArrowRight, FiX } from "react-icons/fi";
+import { HiHandThumbUp } from "react-icons/hi2";
 import { BiJoystick } from "react-icons/bi";
 
 export default function GameDetail() {
   const { gameId } = useParams();
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
   const { addToast } = useToast();
   
   const [game, setGame] = useState(null);
@@ -453,92 +454,13 @@ export default function GameDetail() {
         {/* LEFT COLUMN - REVIEWS & DETAILS */}
         <div className="space-y-12">
 
-          {/* GAMEMETER SECTION - ENHANCED & CLICKABLE */}
-          <section className="bg-[#0f0f0f] border border-[#1e1e1e] rounded-[16px] p-8 md:p-12 relative overflow-hidden sticky top-20 z-10">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--accent)] filter blur-[100px] opacity-[0.05] pointer-events-none"></div>
-            
-            <div className="mb-8">
-              <span className="inline-block bg-[#1a1a1a] text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-bold px-4 py-2 rounded-full mb-6 border border-[#2a2a2a]">
-                Community Verdict
-              </span>
-              
-              <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 md:gap-0 mb-4">
-                <div>
-                  {verdictStats.total > 0 ? (
-                    <>
-                      <h2 className="font-syne text-[28px] md:text-[40px] font-black leading-none mb-2">
-                        {Math.max(verdictStats.mustPlay, verdictStats.goodEnough, verdictStats.skipIt, verdictStats.masterpiece)}/{verdictStats.total}
-                      </h2>
-                      <h3 className="font-syne text-[20px] font-black leading-none">
-                        {dominantVerdict && (
-                          <span style={{color: getVerdictMetadata(dominantVerdict).color}}>
-                            {getVerdictMetadata(dominantVerdict).label}
-                          </span>
-                        )}
-                      </h3>
-                    </>
-                  ) : (
-                    <>
-                      <h2 className="font-syne text-[28px] md:text-[40px] font-black leading-none mb-2 text-[#666]">
-                        0/0
-                      </h2>
-                      <h3 className="font-syne text-[20px] font-black leading-none text-[#666]">
-                        NO VOTES YET
-                      </h3>
-                    </>
-                  )}
-                </div>
-                <p className="text-[14px] text-[var(--text-muted)]">
-                  Based on <span className="font-bold text-white">{verdictStats.total.toLocaleString()}</span> player {verdictStats.total === 1 ? 'vote' : 'votes'}
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              {[
-                { id: 'masterpiece', label: "Perfection", color: "#a855f7", icon: HiSparkles },
-                { id: 'mustPlay', label: "Go for it", color: "#2ed573", icon: HiHandThumbUp },
-                { id: 'goodEnough', label: "Timepass", color: "#ffa502", icon: HiMinus },
-                { id: 'skipIt', label: "Skip", color: "#ff4757", icon: HiHandThumbDown },
-              ].map(v => {
-                const count = verdictStats[v.id] || 0;
-                const percent = verdictStats.total > 0 ? Math.round((count / verdictStats.total) * 100) : 0;
-                const isUserVote = userVerdict === v.id;
-                return (
-                  <button
-                    key={v.id}
-                    onClick={() => user ? setShowVerdictModal(true) : addToast("Sign in to vote", "error")}
-                    className={`w-full flex items-center gap-4 p-4 rounded-lg transition-all border ${
-                      isUserVote
-                        ? 'border-[var(--accent)] bg-[var(--accent)]/10'
-                        : 'border-[#222] hover:border-[#333] hover:bg-[#1a1a1a]'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 w-[140px] text-[14px] font-medium flex-shrink-0">
-                      <v.icon size={18} aria-hidden="true" style={{color: v.color}} />
-                      <span className="text-white">{v.label}</span>
-                    </div>
-                    <div className="flex-1">
-                      <div className="h-2 bg-[#1a1a1a] rounded-full overflow-hidden border border-[#2a2a2a]">
-                        <div 
-                          className="h-full rounded-full transition-all duration-1000 ease-out"
-                          style={{ width: `${percent}%`, backgroundColor: v.color }}
-                        ></div>
-                      </div>
-                    </div>
-                    <div className="text-right w-[60px] text-[13px] font-bold text-white">
-                      {count}/{verdictStats.total}
-                    </div>
-                    {isUserVote && (
-                      <div className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-[var(--accent)] text-black">
-                        Your Vote
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </section>
+          {/* GAMEMETER SECTION - WITH SEMICIRCLE VISUALIZATION */}
+          <VerdictMeter 
+            verdictStats={verdictStats}
+            dominantVerdict={dominantVerdict}
+            userVerdict={userVerdict}
+            onVote={() => user ? setShowVerdictModal(true) : addToast("Sign in to vote", "error")}
+          />
 
           {/* TRAILER ALTERNATIVE (if screenshots show) */}
           {screenshots.length > 0 && (
