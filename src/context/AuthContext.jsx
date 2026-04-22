@@ -25,7 +25,11 @@ export function AuthProvider({ children }) {
           // Force refresh token to ensure custom claims are up to date.
           await currentUser.getIdToken(true);
           const idTokenResult = await currentUser.getIdTokenResult();
-          setIsAdmin(idTokenResult.claims?.role === 'admin');
+          
+          // Check for admin role via custom claims or hardcoded admin email
+          const hasAdminClaim = idTokenResult.claims?.role === 'admin';
+          const isAdminEmail = currentUser.email === 'codecraftkavya@gmail.com';
+          setIsAdmin(hasAdminClaim || isAdminEmail);
 
           try {
             const userRef = doc(db, "users", currentUser.uid);

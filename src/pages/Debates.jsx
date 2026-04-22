@@ -90,8 +90,8 @@ export default function Debates() {
       return;
     }
 
-    if (!formData.title.trim() || !formData.statement.trim()) {
-      addToast("Please fill in all fields", "error");
+    if (!formData.statement.trim()) {
+      addToast("Please enter a debate statement", "error");
       return;
     }
 
@@ -99,11 +99,11 @@ export default function Debates() {
     try {
       const debatesRef = collection(db, "debates");
       const newDebate = {
-        title: formData.title,
+        title: formData.title || formData.statement.slice(0, 50),
         statement: formData.statement,
-        gameName: formData.gameName || "General",
+        gameName: formData.gameName || "General Gaming",
         gameId: formData.gameId || null,
-        gameCover: "https://via.placeholder.com/300x400?text=Gaming+Debate",
+        gameCover: "https://via.placeholder.com/300x400?text=Debate",
         creatorId: user.uid,
         creatorName: userProfile?.displayName || userProfile?.username || "Player",
         creatorAvatar: userProfile?.avatar || "",
@@ -113,15 +113,15 @@ export default function Debates() {
         createdAt: new Date().toISOString()
       };
 
-      await addDoc(debatesRef, newDebate);
+      const docRef = await addDoc(debatesRef, newDebate);
       addToast("Debate created! Awaiting admin approval", "success");
       setFormData({ title: "", statement: "", gameName: "", gameId: null });
       setShowCreateModal(false);
-      // Refresh debates
+      // Refresh debates list
       await fetchDebates();
     } catch (err) {
       console.error("Error creating debate:", err);
-      addToast("Failed to create debate", "error");
+      addToast(err.message || "Failed to create debate", "error");
     } finally {
       setCreateLoading(false);
     }

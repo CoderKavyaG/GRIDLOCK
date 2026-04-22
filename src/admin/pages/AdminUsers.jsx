@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
-import { collection, query, orderBy, limit, startAfter, getDocs, doc, updateDoc, addDoc } from "firebase/firestore";
+import { collection, query, where, orderBy, limit, startAfter, getDocs, doc, updateDoc, addDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
 import PageSkeleton from "../../components/PageSkeleton";
 
 const USERS_PER_PAGE = 20;
 
 export default function AdminUsers() {
   const { user } = useAuth();
+  const { addToast } = useToast();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -123,6 +125,32 @@ export default function AdminUsers() {
     }
   };
 
+  const deleteUser = async (userId, username) => {
+    if (!window.confirm(`Are you sure you want to permanently delete user @${username}? This cannot be undone.`)) {
+      return;
+    }
+
+    setUpdating(userId);
+    try {
+      // Delete user document from Firestore
+      await deleteDoc(doc(db, "users", userId));
+      
+      // Remove from local state
+      setUsers((prev) => prev.filter((u) => u.id !== userId));
+      
+      // Log the action
+      await logAction("delete user", userId, `Deleted user @${username}`);
+      
+      addToast(`User @${username} has been deleted`, "success");
+    } catch (err) {
+      console.error("Delete user error:", err);
+      setError("Failed to delete user.");
+      addToast("Failed to delete user", "error");
+    } finally {
+      setUpdating(null);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -225,6 +253,13 @@ export default function AdminUsers() {
                         } disabled:opacity-50`}
                       >
                         {updating === user.id ? "..." : user.isAdmin ? "Remove Admin" : "Make Admin"}
+                      </button>
+                      <button
+                        onClick={() => deleteUser(user.id, user.username)}
+                        disabled={updating === user.id}
+                        className="text-xs px-3 py-1 rounded border border-red-700 text-red-300 hover:bg-red-950 transition-colors disabled:opacity-50"
+                      >
+                        {updating === user.id ? "..." : "Delete"}
                       </button>
                     </div>
                   </td>

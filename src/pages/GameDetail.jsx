@@ -45,6 +45,111 @@ export default function GameDetail() {
   const [reviewComments, setReviewComments] = useState({});
   const [newCommentText, setNewCommentText] = useState({});
 
+  // Function to refetch all Firebase data (reviews, verdicts, user votes)
+  const refetchFirebaseData = async () => {
+    try {
+      // Fetch community reviews mapped to this game (only approved ones)
+      const reviewsRef = collection(db, "reviews");
+      const q = query(
+        reviewsRef, 
+        where("gameId", "==", parseInt(gameId)),
+        where("approved", "==", true),
+        orderBy("createdAt", "desc"), 
+        limit(10)
+      );
+      const reviewDocs = await getDocs(q);
+      
+      const fetchedReviews = [];
+      const reviewUserIds = new Set();
+      const stats = { mustPlay: 0, goodEnough: 0, skipIt: 0, masterpiece: 0, total: 0 };
+      
+      // Collect user IDs from reviews for later comparison
+      reviewDocs.forEach(doc => {
+          const data = doc.data();
+          fetchedReviews.push({ id: doc.id, ...data });
+          if (data.uid) reviewUserIds.add(data.uid);
+      });
+      
+      setReviews(fetchedReviews);
+
+      // First, count all votes and create verdict-only entries
+      const verdictOnlyList = [];
+      try {
+        const votesRef = collection(db, "votes");
+        const votesQuery = query(votesRef, where("gameId", "==", parseInt(gameId)));
+        const votesDocs = await getDocs(votesQuery);
+        
+        votesDocs.forEach(doc => {
+          const data = doc.data();
+          if (stats[data.verdict] !== undefined) {
+            stats[data.verdict]++;
+            stats.total++;
+          }
+          
+          // Check if this vote doesn't have a review
+          if (data.uid && !reviewUserIds.has(data.uid)) {
+            verdictOnlyList.push({
+              id: doc.id,
+              ...data,
+              isVerdictOnly: true,
+              createdAt: data.createdAt || new Date()
+            });
+          }
+        });
+        
+        // Fetch user data for verdict-only entries
+        for (let entry of verdictOnlyList) {
+          try {
+            const userRef = doc(db, "users", entry.uid);
+            const userDoc = await getDoc(userRef);
+            if (userDoc.exists()) {
+              entry.userData = userDoc.data();
+            }
+          } catch (err) {
+            console.warn("Failed to fetch user data for verdict entry:", err);
+          }
+        }
+        
+        setVerdictOnlyEntries(verdictOnlyList);
+      } catch (votesErr) {
+        console.warn("Failed to fetch votes:", votesErr);
+      }
+
+      // Fetch user specific data
+      if (user) {
+        // Check shelf
+        const shelfRef = doc(db, `gameShelf/${user.uid}/games/${gameId}`);
+        const shelfDoc = await getDoc(shelfRef);
+        if (shelfDoc.exists()) {
+            setUserShelfStatus(shelfDoc.data().status);
+        }
+
+        // Check user vote
+        const voteRef = doc(db, "votes", `${user.uid}_${gameId}`);
+        const voteDoc = await getDoc(voteRef);
+        if (voteDoc.exists()) {
+            setUserVerdict(voteDoc.data().verdict);
+        }
+      }
+      
+      setVerdictStats(stats);
+      
+      // Calculate dominant verdict
+      let maxVerdict = null;
+      let maxCount = 0;
+      for (const [key, val] of Object.entries(stats)) {
+          if (key !== 'total' && val > maxCount) {
+              maxCount = val;
+              maxVerdict = key;
+          }
+      }
+      setDominantVerdict(maxVerdict);
+
+    } catch (error) {
+       console.error("Error fetching firebase data", error);
+    }
+  };
+
   // Fetch Game Details
   useEffect(() => {
     const fetchGameData = async () => {
@@ -91,117 +196,10 @@ export default function GameDetail() {
 
   // Fetch User specific data and Game specific community stats from Firebase
   useEffect(() => {
-    const fetchFirebaseData = async () => {
-      try {
-        // Fetch community reviews mapped to this game (only approved ones)
-        const reviewsRef = collection(db, "reviews");
-        const q = query(
-          reviewsRef, 
-          where("gameId", "==", parseInt(gameId)),
-          where("approved", "==", true),
-          orderBy("createdAt", "desc"), 
-          limit(10)
-        );
-        const reviewDocs = await getDocs(q);
-        
-        const fetchedReviews = [];
-        const reviewUserIds = new Set();
-        const stats = { mustPlay: 0, goodEnough: 0, skipIt: 0, masterpiece: 0, total: 0 };
-        
-        // Collect user IDs from reviews for later comparison
-        reviewDocs.forEach(doc => {
-            const data = doc.data();
-            fetchedReviews.push({ id: doc.id, ...data });
-            if (data.uid) reviewUserIds.add(data.uid);
-        });
-        
-        setReviews(fetchedReviews);
-
-        // First, count all votes and create verdict-only entries
-        const verdictOnlyList = [];
-        try {
-          const votesRef = collection(db, "votes");
-          const votesQuery = query(votesRef, where("gameId", "==", parseInt(gameId)));
-          const votesDocs = await getDocs(votesQuery);
-          
-          votesDocs.forEach(doc => {
-            const data = doc.data();
-            if (stats[data.verdict] !== undefined) {
-              stats[data.verdict]++;
-              stats.total++;
-            }
-            
-            // Check if this vote doesn't have a review
-            if (data.uid && !reviewUserIds.has(data.uid)) {
-              verdictOnlyList.push({
-                id: doc.id,
-                ...data,
-                isVerdictOnly: true,
-                createdAt: data.createdAt || new Date()
-              });
-            }
-          });
-          
-          // Fetch user data for verdict-only entries
-          for (let entry of verdictOnlyList) {
-            try {
-              const userRef = doc(db, "users", entry.uid);
-              const userDoc = await getDoc(userRef);
-              if (userDoc.exists()) {
-                entry.userData = userDoc.data();
-              }
-            } catch (err) {
-              console.warn("Failed to fetch user data for verdict entry:", err);
-            }
-          }
-          
-          setVerdictOnlyEntries(verdictOnlyList);
-        } catch (votesErr) {
-          console.warn("Failed to fetch votes:", votesErr);
-        }
-
-        // Fetch user specific data
-        if (user) {
-          // Check shelf
-          const shelfRef = doc(db, `gameShelf/${user.uid}/games/${gameId}`);
-          const shelfDoc = await getDoc(shelfRef);
-          if (shelfDoc.exists()) {
-              setUserShelfStatus(shelfDoc.data().status);
-          }
-
-          // Check user vote
-          const voteRef = doc(db, "votes", `${user.uid}_${gameId}`);
-          const voteDoc = await getDoc(voteRef);
-          if (voteDoc.exists()) {
-              setUserVerdict(voteDoc.data().verdict);
-          }
-        }
-        
-        setVerdictStats(stats);
-        
-        // Calculate dominant verdict
-        let maxVerdict = null;
-        let maxCount = 0;
-        for (const [key, val] of Object.entries(stats)) {
-            if (key !== 'total' && val > maxCount) {
-                maxCount = val;
-                maxVerdict = key;
-            }
-        }
-        setDominantVerdict(maxVerdict);
-
-      } catch (error) {
-         console.error("Error fetching firebase data", error);
-      } finally {
-        setReviewsLoading(false);
-      }
-    };
-    
-    // Only fetch once gameData is set so we have gameId as a number easily if needed
     if (gameId) {
-        fetchFirebaseData();
+      setReviewsLoading(true);
+      refetchFirebaseData().then(() => setReviewsLoading(false));
     }
-
   }, [gameId, user]);
 
 
@@ -761,7 +759,9 @@ export default function GameDetail() {
           game={{ id: game.id, name: game.name, cover: game.background_image }}
           onClose={() => setShowReviewModal(false)}
           onSuccess={(reviewId) => {
-            window.location.reload(); 
+            setShowReviewModal(false);
+            addToast("Review submitted! Awaiting admin approval", "success");
+            refetchFirebaseData();
           }}
         />
       )}
