@@ -7,7 +7,6 @@ import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import SEO from "../components/SEO";
 import AddToShelfButton from "../components/AddToShelfButton";
-import VerdictModal from "../components/VerdictModal";
 import WriteReviewModal from "../components/WriteReviewModal";
 import VerdictMeter from "../components/VerdictMeter";
 import Lightbox from "../components/Lightbox";
@@ -35,7 +34,6 @@ export default function GameDetail() {
   const [verdictOnlyEntries, setVerdictOnlyEntries] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
   
-  const [showVerdictModal, setShowVerdictModal] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [trailerFullscreen, setTrailerFullscreen] = useState(false);
   
@@ -454,10 +452,11 @@ export default function GameDetail() {
 
           {/* GAMEMETER SECTION - WITH SEMICIRCLE VISUALIZATION */}
           <VerdictMeter 
+            game={{ id: game.id, name: game.name, cover: game.background_image }}
             verdictStats={verdictStats}
             dominantVerdict={dominantVerdict}
             userVerdict={userVerdict}
-            onVote={() => user ? setShowVerdictModal(true) : addToast("Sign in to vote", "error")}
+            onVoteSuccess={() => refetchFirebaseData()}
           />
 
           {/* TRAILER ALTERNATIVE (if screenshots show) */}
@@ -739,17 +738,6 @@ export default function GameDetail() {
           onNavigate={(dir) => {
             if (dir === 'next') setLightboxIndex(i => (i + 1) % screenshots.length);
             if (dir === 'prev') setLightboxIndex(i => (i - 1 + screenshots.length) % screenshots.length);
-          }}
-        />
-      )}
-
-      {showVerdictModal && (
-        <VerdictModal 
-          game={{ id: game.id, name: game.name, cover: game.background_image }}
-          currentVerdict={userVerdict}
-          onClose={() => setShowVerdictModal(false)}
-          onSuccess={(verdict) => {
-            setUserVerdict(verdict);
           }}
         />
       )}

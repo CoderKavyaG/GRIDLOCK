@@ -1,12 +1,52 @@
+import { useState } from "react";
 import { HiSparkles, HiHandThumbUp, HiMinus, HiHandThumbDown } from "react-icons/hi2";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "../firebase/firebase";
+import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 
-export default function VerdictMeter({ verdictStats, dominantVerdict, userVerdict, onVote }) {
+export default function VerdictMeter({ game, verdictStats, dominantVerdict, userVerdict, onVoteSuccess }) {
+  const { user } = useAuth();
+  const { addToast } = useToast();
+  const [votingVerdict, setVotingVerdict] = useState(null);
+  const [submittingVote, setSubmittingVote] = useState(false);
   const verdictConfig = [
     { id: 'masterpiece', label: "Perfection", color: "#a855f7", icon: HiSparkles },
     { id: 'mustPlay', label: "Go for it", color: "#2ed573", icon: HiHandThumbUp },
     { id: 'goodEnough', label: "Timepass", color: "#ffa502", icon: HiMinus },
     { id: 'skipIt', label: "Skip", color: "#ff4757", icon: HiHandThumbDown },
   ];
+
+  const handleCastVote = async (verdictId) => {
+    if (!user) {
+      addToast("Sign in to cast your verdict", "error");
+      return;
+    }
+
+    setSubmittingVote(true);
+    setVotingVerdict(verdictId);
+
+    try {
+      const voteRef = doc(db, "votes", `${user.uid}_${game.id}`);
+      await setDoc(voteRef, {
+        uid: user.uid,
+        gameId: game.id,
+        verdict: verdictId,
+        updatedAt: new Date().toISOString(),
+      });
+
+      addToast("Verdict saved!", "success");
+      if (onVoteSuccess) {
+        onVoteSuccess(verdictId);
+      }
+    } catch (err) {
+      console.error("Error casting verdict:", err);
+      addToast("Failed to save verdict", "error");
+    } finally {
+      setSubmittingVote(false);
+      setVotingVerdict(null);
+    }
+  };
 
   const total = verdictStats.total || 0;
   
@@ -175,12 +215,13 @@ export default function VerdictMeter({ verdictStats, dominantVerdict, userVerdic
           return (
             <button
               key={v.id}
-              onClick={() => onVote && onVote()}
+              onClick={() => handleCastVote(v.id)}
+              disabled={submittingVote}
               className={`w-full flex items-center gap-4 p-4 rounded-lg transition-all border ${
                 isUserVote
                   ? 'border-[var(--accent)] bg-[var(--accent)]/10'
-                  : 'border-[#222] hover:border-[#333] hover:bg-[#1a1a1a]'
-              }`}
+                  : 'border-[#222] hover:border-[#333] hover:bg-[#1a1a1a] cursor-pointer'
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               <div className="flex items-center gap-2 w-[140px] text-[14px] font-medium flex-shrink-0">
                 <v.icon size={18} aria-hidden="true" style={{color: v.color}} />
@@ -197,11 +238,16 @@ export default function VerdictMeter({ verdictStats, dominantVerdict, userVerdic
               <div className="text-right w-[60px] text-[13px] font-bold text-white">
                 {slice.count}/{total}
               </div>
-              {isUserVote && (
-                <div className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-[var(--accent)] text-black">
-                  Your Vote
+              {votingVerdict === v.id && submittingVote ? (
+                <div className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-[var(--accent)] text-black flex items-center gap-1">
+                  <div className="w-3 h-3 border-2 border-black/20 border-t-black rounded-full animate-spin"></div>
+                  Saving
                 </div>
-              )}
+              ) : isUserVote ? (
+                <div className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-[var(--accent)] text-black">
+                  ✓ Your Vote
+                </div>
+              ) : null}
             </button>
           );
         })}
