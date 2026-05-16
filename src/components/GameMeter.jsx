@@ -62,9 +62,9 @@ export const GameMeter = ({ games = [], loading }) => {
                 </div>
 
                 {/* Cards Row Container */}
-                <div className="flex gap-[24px] overflow-x-auto scrollbar-hide snap-x pb-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 overflow-hidden">
                     {loading ? (
-                        <div className="text-text-muted w-full text-center py-10">Loading GameMeter...</div>
+                        <div className="text-text-muted w-full text-center py-10 col-span-full">Loading GameMeter...</div>
                     ) : (
                         displayGames.map((game, i) => {
                             const mock = mockVerdicts[i] || mockVerdicts[0];
@@ -73,8 +73,9 @@ export const GameMeter = ({ games = [], loading }) => {
                             return (
                                 <div
                                     key={game.id || i}
-                                    className="w-[280px] lg:w-1/3 shrink-0 snap-center bg-[#161616] border border-[#222] rounded-[12px] overflow-hidden flex flex-col"
+                                    className="w-full bg-[#161616]/40 backdrop-blur-md border border-white/5 rounded-[16px] overflow-hidden flex flex-col glass-card hover:border-accent/30 transition-all duration-500"
                                 >
+
                                     {/* Top Image */}
                                     <div className="w-full aspect-video bg-[#1a1a1a]">
                                         {game.background_image && (
