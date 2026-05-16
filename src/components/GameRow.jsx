@@ -61,18 +61,26 @@ export const GameRow = ({ title, chipLabel, chipColor, games, loading, error, se
                     variants={containerVariants}
                     initial="hidden"
                     whileInView="show"
-                    viewport={{ once: true, amount: 0.1 }}
+                    viewport={{ once: true, amount: 0 }}
+
                 >
                     {loading ? (
                         Array.from({ length: 8 }).map((_, i) => (
-                            <SkeletonCard key={i} />
+                            <div key={i} className="flex-shrink-0 w-[180px] sm:w-[220px] md:w-[260px]">
+                                <SkeletonCard />
+                            </div>
                         ))
                     ) : (games && Array.isArray(games) && games.length > 0) ? (
                         games.map((game, i) => (
-                            <motion.div key={game.id} variants={itemVariants}>
+                            <motion.div 
+                                key={game.id} 
+                                variants={itemVariants}
+                                className="flex-shrink-0 w-[180px] sm:w-[220px] md:w-[260px]"
+                            >
                                 <GameCard game={game} rank={showRank ? i + 1 : undefined} />
                             </motion.div>
                         ))
+
                     ) : (
                         <div className="text-[14px] text-text-muted">No games to display.</div>
                     )}

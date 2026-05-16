@@ -44,10 +44,11 @@ export const EditorialHero = () => {
             >
                 <div className="absolute inset-0">
                     <img 
-                        src={heroGame.background_image} 
+                        src={heroGame.background_image || "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=1200"} 
                         alt={heroGame.name} 
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
+
                     {/* Triple Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/40 to-transparent"></div>
                     <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a]/60 top-0 left-0 w-1/2 h-full"></div>
@@ -83,10 +84,11 @@ export const EditorialHero = () => {
                     >
                         <div className="absolute inset-0">
                             <img 
-                                src={game.background_image} 
+                                src={game.background_image || "https://images.unsplash.com/photo-1552824236-07764a8391d2?auto=format&fit=crop&q=80&w=800"} 
                                 alt={game.name} 
                                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                             />
+
                             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
                             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors"></div>
                         </div>

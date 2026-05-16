@@ -8,15 +8,16 @@ const BASE = "https://api.rawg.io/api";
 const KEY = import.meta.env.VITE_RAWG_KEY;
 
 const moods = [
-    { id: 'story', title: 'LOST IN STORY', param: 'genres=role-playing-games-rpg', icon: FiBook, count: '4,200+' },
-    { id: 'vibes', title: 'JUST VIBES', param: 'genres=indie', icon: FiFeather, count: '8,100+' },
-    { id: 'action', title: 'HEART PUMPING', param: 'genres=action', icon: FiZap, count: '12,400+' },
-    { id: 'brain', title: 'BIG BRAIN', param: 'genres=strategy', icon: FiCpu, count: '3,800+' },
-    { id: 'terror', title: 'TERROR MODE', param: 'tags=horror', icon: FiMoon, count: '1,500+' },
-    { id: 'chill', title: 'TAKE IT EASY', param: 'genres=puzzle', icon: FiGrid, count: '2,900+' },
-    { id: 'feels', title: 'FEEL SOMETHING', param: 'genres=adventure', icon: FiCompass, count: '6,700+' },
-    { id: 'boys', title: 'WITH THE BOYS', param: 'genres=shooter', icon: FiTarget, count: '5,300+' }
+    { id: 'story', title: 'LOST IN STORY', param: 'genres=role-playing-games-rpg', icon: FiBook, count: '4,200+', fallback: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=800' },
+    { id: 'vibes', title: 'JUST VIBES', param: 'genres=indie', icon: FiFeather, count: '8,100+', fallback: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=800' },
+    { id: 'action', title: 'HEART PUMPING', param: 'genres=action', icon: FiZap, count: '12,400+', fallback: 'https://images.unsplash.com/photo-1552824236-07764a8391d2?auto=format&fit=crop&q=80&w=800' },
+    { id: 'brain', title: 'BIG BRAIN', param: 'genres=strategy', icon: FiCpu, count: '3,800+', fallback: 'https://images.unsplash.com/photo-1551103782-8ab07afd45c1?auto=format&fit=crop&q=80&w=800' },
+    { id: 'terror', title: 'TERROR MODE', param: 'tags=horror', icon: FiMoon, count: '1,500+', fallback: 'https://images.unsplash.com/photo-1509248961158-e54f6934749c?auto=format&fit=crop&q=80&w=800' },
+    { id: 'chill', title: 'TAKE IT EASY', param: 'genres=puzzle', icon: FiGrid, count: '2,900+', fallback: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&q=80&w=800' },
+    { id: 'feels', title: 'FEEL SOMETHING', param: 'genres=adventure', icon: FiCompass, count: '6,700+', fallback: 'https://images.unsplash.com/photo-1612178537253-bccd437b730e?auto=format&fit=crop&q=80&w=800' },
+    { id: 'boys', title: 'WITH THE BOYS', param: 'genres=shooter', icon: FiTarget, count: '5,300+', fallback: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=800' }
 ];
+
 
 export const MoodGrid = () => {
     const [backgrounds, setBackgrounds] = useState({});
@@ -131,9 +132,9 @@ export const MoodGrid = () => {
                                 <div
                                     className="absolute inset-0 w-full h-full bg-[#1a1a1a] transition-transform duration-400 ease-in-out group-hover:scale-[1.04]"
                                 >
-                                    {bgImage ? (
+                                    {(bgImage || mood.fallback) ? (
                                         <img
-                                            src={bgImage}
+                                            src={bgImage || mood.fallback}
                                             alt={mood.title}
                                             className="w-full h-full object-cover"
                                             loading="lazy"
@@ -144,6 +145,7 @@ export const MoodGrid = () => {
                                         </div>
                                     )}
                                 </div>
+
 
                                 {/* Overlays */}
                                 <div className="absolute inset-0 bg-black/55 group-hover:bg-black/35 transition-colors duration-400 z-[1]"></div>
