@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { auth, db } from "../firebase/firebase";
+import { auth, db, isFirebaseEnabled } from "../firebase/firebase";
 import { onAuthStateChanged, signOut as firebaseSignOut } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { generateRandomProfile } from "../utils/profileGenerator";
@@ -17,6 +17,11 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!isFirebaseEnabled || !auth) {
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
 
@@ -112,7 +117,10 @@ export function AuthProvider({ children }) {
   }, []);
 
   const signOut = () => {
-    return firebaseSignOut(auth);
+    if (isFirebaseEnabled && auth) {
+      return firebaseSignOut(auth);
+    }
+    return Promise.resolve();
   };
 
   const value = {

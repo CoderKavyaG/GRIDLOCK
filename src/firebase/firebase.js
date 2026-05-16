@@ -9,9 +9,25 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const googleProvider = new GoogleAuthProvider();
+let auth, db, googleProvider;
+let isFirebaseEnabled = false;
 
-export { auth, db, googleProvider };
+try {
+  if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "") {
+    throw new Error("Missing VITE_FIREBASE_API_KEY. Firebase features will be disabled.");
+  }
+  const app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db = getFirestore(app);
+  googleProvider = new GoogleAuthProvider();
+  isFirebaseEnabled = true;
+} catch (error) {
+  console.warn("Firebase initialization skipped:", error.message);
+  auth = null;
+  db = null;
+  googleProvider = null;
+}
+
+export { auth, db, googleProvider, isFirebaseEnabled };
+
+
